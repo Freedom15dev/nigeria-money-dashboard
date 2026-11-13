@@ -3,6 +3,8 @@
 **Understand what the economy is doing to your money.**
 *Nigeria's economy, through the numbers.*
 
+**Open the app: [money-matters-ng.streamlit.app](https://money-matters-ng.streamlit.app/)**
+
 Money Matters is a data-driven platform that helps Nigerians understand how the economy affects
 their everyday finances. It brings together key economic indicators such as inflation, exchange
 rates, interest rates, savings and borrowing into one interactive dashboard. Users can explore

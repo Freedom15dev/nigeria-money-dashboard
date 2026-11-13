@@ -21,6 +21,7 @@
   under it, supporting line as a small caption.
 
 Repo: `nigeria-money-dashboard` on GitHub (local folder: `naija-money-dashboard`)
+Live app: https://money-matters-ng.streamlit.app/ (Streamlit Cloud, main file `app/Home.py`, redeploys on push to `main`)
 Author: Freedom Oboh (GitHub: Freedom15dev), data analyst and Excel trainer, Lagos
 Builds on: `nigeria-inflation-forecast`, `nigeria-savings-vs-inflation`, `naira-scenarios`,
 `nigeria-credit-squeeze` (and its live loan calculator, https://naija-loan-cost.streamlit.app/)
@@ -236,5 +237,5 @@ If validation fails, keep the old data and fail the run with a clear message.
 
 ## 8. Ask me before you start
 1. The four article links for the footer.
-2. The Streamlit app address you'd like (e.g. money-matters-ng.streamlit.app), if it's available.
+2. The Streamlit app address you'd like. (Answered: money-matters-ng.streamlit.app)
 3. Anything unclear in the old notebooks: ask, don't guess.
