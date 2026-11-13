@@ -53,12 +53,29 @@ def kpi(title, value, change_html, help_text, value_colour=NAVY):
             f'<p class="num" style="color:{value_colour}">{value}</p><p class="chg">{change_html}</p></article>')
 
 
+estimated = []  # rates whose year-ago figure was a feed glitch (see clean.fix_one_month_spikes)
+
+
+def rate_change(col):
+    """Change in a rate over 12 months. If the year-ago figure was removed as a one-month glitch,
+    compare with the chart value (the straight line between its neighbours) and say so."""
+    old = then[col]
+    if pd.isna(old) and pd.notna(then.get(f"{col}_chart")):
+        old = then[f"{col}_chart"]
+        estimated.append(col)
+    return now[col] - old
+
+
+def note(col, words):
+    return f"{words} (vs an estimated {year_ago:%b %Y})" if col in estimated else words
+
+
 d_infl = now["inflation"] - then["inflation"]
 d_fx = (now["usd_ngn"] / then["usd_ngn"] - 1) * 100
-d_sav = now["savingsDeposit"] - then["savingsDeposit"]
-d_mpr = now["policy_rate"] - then["policy_rate"]
-d_prime = now["primeLending"] - then["primeLending"]
-d_max = now["maxLending"] - then["maxLending"]
+d_sav = rate_change("savingsDeposit")
+d_mpr = rate_change("policy_rate")
+d_prime = rate_change("primeLending")
+d_max = rate_change("maxLending")
 real_then = then["real_savings_rate"]
 
 if real < 0 and real_then < 0:
@@ -78,15 +95,16 @@ cards = [
     kpi("₦ per $1 (official)", naira(now["usd_ngn"], 2),
         change(d_fx, "%", "down", "the naira is stronger" if d_fx < 0 else "the naira is weaker"), HELP["usd"]),
     kpi("Savings account rate", pct(now["savingsDeposit"]),
-        change(d_sav, "pts", "up", "savings pay more" if d_sav > 0 else "savings pay less"), HELP["savings"]),
+        change(d_sav, "pts", "up", note("savingsDeposit", "savings pay more" if d_sav > 0 else "savings pay less")),
+        HELP["savings"]),
     kpi("Real savings rate", pct(real), real_change, HELP["real"], value_colour=BAD if real < 0 else GOOD),
     kpi("Policy rate (MPR)", pct(now["policy_rate"]),
-        change(d_mpr, "pts", None, "the CBN has cut rates" if d_mpr < 0 else "the CBN has raised rates"),
+        change(d_mpr, "pts", None, note("policy_rate", "the CBN has cut rates" if d_mpr < 0 else "the CBN has raised rates")),
         HELP["mpr"]),
     kpi("Bank lending: best borrowers", pct(now["primeLending"]),
-        change(d_prime, "pts", "down", "prime lending rate"), HELP["prime"]),
+        change(d_prime, "pts", "down", note("primeLending", "prime lending rate")), HELP["prime"]),
     kpi("Bank lending: riskier borrowers", pct(now["maxLending"]),
-        change(d_max, "pts", "down", "maximum lending rate"), HELP["max"]),
+        change(d_max, "pts", "down", note("maxLending", "maximum lending rate")), HELP["max"]),
 ]
 section_head("The key numbers", f"{latest:%B %Y}, compared with {year_ago:%B %Y}")
 st.html(f'<div class="mm mm-cards">{"".join(cards)}</div>')
@@ -99,6 +117,9 @@ with st.expander("What these terms mean"):
         st.markdown(f"**{term}.** {HELP[key]}")
     st.caption("Green means better for an ordinary saver or borrower, red means worse. "
                "Rates are CBN averages; real banks differ.")
+    if estimated:
+        st.markdown(f"**Estimated year-ago figures.** {meta['trap_notes']['rate_spikes']} The change on "
+                    f"those cards compares with that straight-line value for {year_ago:%B %Y}.")
 
 # ----------------------------------------------------------------------------- explore
 section_head("Explore")

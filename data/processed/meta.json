@@ -1,7 +1,7 @@
 {
   "latest_month": "2026-09-01",
   "latest_month_label": "September 2026",
-  "built_at_utc": "2026-11-13T10:28:05+00:00",
+  "built_at_utc": "2026-11-13T12:44:12+00:00",
   "pulled_at_utc": {
     "inflation": "2026-11-13T10:26:29+00:00",
     "money_market": "2026-11-13T10:26:29+00:00",
@@ -18,6 +18,7 @@
     "2025 inflation: using the CBN feed's revised figures as published (Jan 2026 NBS revision).",
     "Policy rate: 11 zero MPR months replaced by the MRR.",
     "T-bill zeros treated as missing: ['2017-12', '2018-12'].",
+    "One-month spikes treated as missing: ['primeLending 2025-09 (18.88 -> 11.90 -> 18.89)'].",
     "Exchange rate: daily -> monthly average; 6 duplicate days averaged; one-day typos removed: ['2003-12-09 (₦1,376.80 vs ₦136.80 nearby)', '2007-08-28 (₦74.52 vs ₦124.45 nearby)', '2008-08-01 (₦66.09 vs ₦116.09 nearby)'].",
     "Credit to government below zero in 93 months: kept as published (net lender).",
     "Credit gaps filled for charts only: ['2026-03'].",
@@ -42,6 +43,7 @@
     "rebasing_2025": "In January 2025 the NBS rebased the price index (new basket, new base year). That is part of why inflation fell sharply that month. Our price index is built from the yearly rates, so it runs straight across the break without restarting.",
     "policy_rate": "The Monetary Policy Rate (MPR) only started in December 2006. Before that the CBN's main rate was the Minimum Rediscount Rate (MRR), and the feed shows the MPR as 0. We use one 'policy rate' column: the MRR before December 2006 and the MPR after.",
     "tbill_zeros": "The Treasury bill rate shows 0.00% in December 2017 and December 2018, between months of 11-13%. A 0% rate never happened, so we treat both as missing. For the savings calculator we carry the previous month's rate forward for those two months.",
+    "rate_spikes": "A few rates jump for a single month and snap straight back, which is a glitch in the feed, not history. For example the prime lending rate shows 11.90% in September 2025, between 18.88% in August and 18.89% in October. Our rule: a month more than 5 points away from both neighbours, while the neighbours agree within 1 point, is treated as missing. Charts draw a straight line across it; no calculation uses it. (Not applied to the interbank call rate, which really does swing that much.)",
     "credit_march_2026": "Credit figures for March 2026 are missing from the CBN feed. Charts draw a straight line between February and April; no calculation uses the filled value.",
     "credit_to_government_negative": "Credit to government is below zero in many months up to 2014. That is real, not an error: the government kept more money in the banks than it borrowed, so on balance it was a lender.",
     "exchange_rates": "The CBN publishes the official rate daily. We average each month's days to get one monthly rate and record how many days went into each average. A few days appear twice; we average the two. Three days are clear typing errors (for example ₦1,376.80 on 9 December 2003, when the days around it were about ₦136.80); a day more than 25% away from the 11 trading days around it is dropped. This is the official rate only, not the parallel (street) market rate."

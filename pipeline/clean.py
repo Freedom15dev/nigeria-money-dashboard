@@ -50,6 +50,14 @@ TRAP_NOTES = {
         "11-13%. A 0% rate never happened, so we treat both as missing. For the savings calculator "
         "we carry the previous month's rate forward for those two months."
     ),
+    "rate_spikes": (
+        "A few rates jump for a single month and snap straight back, which is a glitch in the feed, "
+        "not history. For example the prime lending rate shows 11.90% in September 2025, between "
+        "18.88% in August and 18.89% in October. Our rule: a month more than 5 points away from both "
+        "neighbours, while the neighbours agree within 1 point, is treated as missing. Charts draw a "
+        "straight line across it; no calculation uses it. (Not applied to the interbank call rate, "
+        "which really does swing that much.)"
+    ),
     "credit_march_2026": (
         "Credit figures for March 2026 are missing from the CBN feed. Charts draw a straight line "
         "between February and April; no calculation uses the filled value."
@@ -193,6 +201,45 @@ def fix_tbill_zeros(mm):
     # Other zero rates are also impossible; interbank has a few. Mark them missing too.
     df.loc[df["interBankCallRate"] == 0, "interBankCallRate"] = np.nan
     return df, f"T-bill zeros treated as missing: {months}."
+
+
+# The interbank call rate (the overnight rate between banks) swings hard from month to month for
+# real reasons (cash in the banking system gets tight or loose), so the spike rule would remove
+# real data there. It isn't used for any number on screen. Excluded by decision, 13 Nov 2026.
+SPIKE_EXCLUDED = {"interBankCallRate"}
+SPIKE_POINTS, NEIGHBOURS_AGREE = 5.0, 1.0
+
+
+def fix_one_month_spikes(mm):
+    """Trap: a rate that jumps for one month and snaps back (e.g. prime lending Sep 2025: 18.88% ->
+    11.90% -> 18.89%) is a glitch in the feed, not history.
+
+    Rule: a month more than 5 points away from BOTH neighbours, while the neighbours agree within
+    1 point, is treated as missing. Applied to every rate series except SPIKE_EXCLUDED. Returns
+    (frame, log line, list of (column, month)) so validation can accept exactly these gaps.
+    """
+    df = mm.copy()
+    caught = []
+    columns = [c for c in RATE_COLUMNS + ["policy_rate"] if c in df.columns and c not in SPIKE_EXCLUDED]
+    for col in columns:
+        s = df[col]
+        prev, nxt = s.shift(1), s.shift(-1)
+        hit = ((s - prev).abs() > SPIKE_POINTS) & ((s - nxt).abs() > SPIKE_POINTS) & ((prev - nxt).abs() <= NEIGHBOURS_AGREE)
+        for i in df.index[hit]:
+            caught.append((col, df.at[i, "month"], prev[i], s[i], nxt[i]))
+        df.loc[hit, col] = np.nan
+    described = [f"{c} {m:%Y-%m} ({a:.2f} -> {v:.2f} -> {b:.2f})" for c, m, a, v, b in caught]
+    line = f"One-month spikes treated as missing: {described if described else 'none'}."
+    return df, line, [(c, f"{m:%Y-%m}") for c, m, *_ in caught]
+
+
+def add_rate_chart_columns(df):
+    """<rate>_chart columns: gaps from the fixes above filled with a straight line, for charts only."""
+    df = df.copy()
+    for col in RATE_COLUMNS + ["policy_rate"]:
+        if col in df.columns:
+            df[f"{col}_chart"] = df[col].interpolate(limit_area="inside")
+    return df
 
 
 def fill_credit_for_charts(credit, months):

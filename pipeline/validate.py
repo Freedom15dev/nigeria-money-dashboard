@@ -68,13 +68,14 @@ def check_months(panel):
 
 def check_gaps(panel):
     errors = []
+    allowed = KNOWN_GAPS | panel.attrs.get("fixed_gaps", set())  # + one-month spikes removed by clean.py
     rules = [(INFLATION_COLUMNS + ["usd_ngn", "price_index"], "2003-01-01"),
              (RATE_COLUMNS, "2006-01-01"), (CREDIT_COLUMNS, "2006-01-01")]
     for columns, start in rules:
         part = panel[panel["month"] >= start]
         for col in columns:
             missing = part.loc[part[col].isna(), "month"]
-            unknown = [m for m in missing if (col, f"{m:%Y-%m}") not in KNOWN_GAPS]
+            unknown = [m for m in missing if (col, f"{m:%Y-%m}") not in allowed]
             if col in CREDIT_COLUMNS:  # credit can be published later: missing latest months are allowed
                 last_published = part.loc[part[col].notna(), "month"].max()
                 unknown = [m for m in unknown if m < last_published]

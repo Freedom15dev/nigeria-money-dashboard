@@ -57,6 +57,7 @@ def build_panel(raw):
 
     mm, line = clean.fix_policy_rate(parsed["money_market"]); log.append(line)
     mm, line = clean.fix_tbill_zeros(mm); log.append(line)
+    mm, line, spike_gaps = clean.fix_one_month_spikes(mm); log.append(line)
 
     _, line = clean.usd_monthly_average(clean.parse_usd_daily(raw["exchange_rates"])); log.append(line)
     usd = parsed["usd"]
@@ -87,7 +88,10 @@ def build_panel(raw):
 
     panel["june_2025_interpolated"] = panel["month"].eq("2025-06-01") & ("June repeated May" in log[0])
     panel["tbill_missing"] = panel["treasuryBill"].isna() & panel["month"].ge("2006-01-01")
+    panel = clean.add_rate_chart_columns(panel)
 
+    # Gaps made on purpose by the fixes, so validate.py accepts exactly these and nothing else.
+    panel.attrs["fixed_gaps"] = set(spike_gaps)
     return panel, log, latest
 
 
