@@ -12,7 +12,7 @@ pages = [
     st.Page("views/savings.py", title=f"My savings · {APP_NAME}", url_path="savings"),
     st.Page("views/prices.py", title=f"Prices · {APP_NAME}", url_path="prices"),
     st.Page("views/naira.py", title=f"The naira · {APP_NAME}", url_path="naira"),
-    # Phase 3: Borrowing.
+    st.Page("views/borrowing.py", title=f"Borrowing · {APP_NAME}", url_path="borrowing"),
 ]
 # Streamlit's own menu is hidden: each page draws the brand header with its tabs (components.brand_header).
 # The page files live in app/views/, NOT app/pages/: Streamlit auto-loads a "pages" folder as old-style pages,

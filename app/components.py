@@ -44,7 +44,7 @@ ARTICLES = {
 
 # Pages in the header (paths as given to st.Page in Home.py). None = not built yet, shown as "soon".
 NAV_PAGES = {"Home": "views/home.py", "My savings": "views/savings.py",
-             "Prices": "views/prices.py", "The naira": "views/naira.py", "Borrowing": None}
+             "Prices": "views/prices.py", "The naira": "views/naira.py", "Borrowing": "views/borrowing.py"}
 
 # --------------------------------------------------------------------------- colours (design/)
 NAVY, BLUE, ORANGE, ORANGE_LIGHT = "#0F1E33", "#2A6FDB", "#D9822B", "#F0A65E"
@@ -173,6 +173,7 @@ h1 a, h2 a, h3 a {display: none !important;}
 [class*="st-key-explore-"] {background: #FFFFFF; border: 1px solid #E3E6EB; border-top: 4px solid #2A6FDB;
   border-radius: 14px; padding: 22px; gap: 8px !important;}
 [class*="st-key-explore-"] [data-testid="stPageLink-NavLink"] {padding: 0; background: none !important;}
+.st-key-explore-borrowing {border-top-color: #D9822B !important;}
 [class*="st-key-explore-"] [data-testid="stPageLink-NavLink"] p {color: #2A6FDB !important; font-weight: 600 !important; font-size: 14px;}
 
 /* ---------- page intro ---------- */

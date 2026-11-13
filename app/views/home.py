@@ -113,6 +113,8 @@ EXPLORE = [  # (key, title, description, page, link text)
     ("prices", "Prices", "Inflation since 2003, and where it may head next.", "views/prices.py", "See prices →"),
     ("naira", "The naira", "20 years of the dollar rate, and the outlook to 2030.", "views/naira.py",
      "See the naira →"),
+    ("borrowing", "Borrowing", "Who pays what to borrow, plus the loan calculator.", "views/borrowing.py",
+     "See borrowing →"),
 ]
 with st.container(key="explore", horizontal=True):
     for key, title, text, page, link in EXPLORE:
@@ -121,9 +123,9 @@ with st.container(key="explore", horizontal=True):
                     f'<span style="font-size:18px;font-weight:700">{title}</span>'
                     f'<span style="font-size:14px;line-height:1.5;color:#4A5568">{text}</span></div>')
             st.page_link(page, label=link)
-    st.html(f'<a class="mm mm-card mm-explore warm" href="{LOAN_CALCULATOR_URL}" target="_blank" rel="noopener">'
-            '<span class="t">Borrowing</span><span class="d">Who pays what to borrow. The page is coming soon; '
-            'the loan calculator works now: <b>work out your own loan →</b></span></a>')
+            if key == "borrowing":
+                st.html(f'<a class="mm" href="{LOAN_CALCULATOR_URL}" target="_blank" rel="noopener" '
+                        f'style="font-size:14px;font-weight:600">Work out your own loan →</a>')
 
 with st.expander("About Money Matters"):
     st.write(DESCRIPTION)

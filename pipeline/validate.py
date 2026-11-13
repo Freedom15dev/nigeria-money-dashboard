@@ -183,6 +183,48 @@ def check_article(panel):
     return errors, log
 
 
+# --------------------------------------------------------------------------- 5b. the credit article
+# Published numbers we deliberately differ from, with the reason (printed in every run log).
+CREDIT_KNOWN_DIFFERENCES = {
+    "neg_prime": "the prime rate's Sep 2025 glitch (11.90%) is treated as missing here; credit-squeeze "
+                 "counted it as a month with a negative real prime rate",
+}
+
+
+def check_credit_article(panel):
+    """The Borrowing page's numbers must reproduce nigeria-credit-squeeze on data to Sep 2026."""
+    import json
+    pub = json.loads((REFERENCE_DIR / "credit_squeeze_numbers.json").read_text(encoding="utf-8"))
+    p = panel[(panel["month"] >= "2006-01-01") & (panel["month"] <= REFERENCE_END)].set_index("month")
+    if p.index.max() < REFERENCE_END:
+        return ["Panel ends before Sep 2026, so the credit article can't be checked."], []
+    r1 = lambda x: round(float(x), 1)  # noqa: E731
+    ours = {
+        "gap_first": r1(p["lending_gap"].iloc[0]), "gap_last": r1(p["lending_gap"].iloc[-1]),
+        "gap_peak": r1(p["lending_gap"].max()), "gap_peak_month": f"{p['lending_gap'].idxmax():%b %Y}",
+        "real_prime_last": r1(p["real_prime"].iloc[-1]), "real_max_last": r1(p["real_max"].iloc[-1]),
+        "real_low": r1(p["real_prime"].min()), "real_low_month": f"{p['real_prime'].idxmin():%b %Y}",
+        "neg_max": int((p["real_max"] < 0).sum()), "neg_prime": int((p["real_prime"] < 0).sum()),
+        "gov_share_first": r1(p["gov_share"].iloc[0]), "gov_share_last": r1(p["gov_share"].iloc[-1]),
+        "gov_neg_months": int(p["gov_net_lender"].sum()),
+        "gov_neg_from": f"{p.index[p['gov_net_lender']].min():%b %Y}",
+        "gov_neg_to": f"{p.index[p['gov_net_lender']].max():%b %Y}",
+    }
+    errors, log = [], []
+    for key, value in ours.items():
+        if value == pub[key]:
+            continue
+        if key in CREDIT_KNOWN_DIFFERENCES:
+            log.append(f"Known difference from credit-squeeze: {key} published {pub[key]}, now {value} "
+                       f"({CREDIT_KNOWN_DIFFERENCES[key]}).")
+        else:
+            errors.append(f"Borrowing numbers no longer match credit-squeeze: {key} published {pub[key]}, now {value}")
+    if not errors:
+        log.append(f"Credit article reproduced: {len(ours) - len(CREDIT_KNOWN_DIFFERENCES)} of {len(ours)} published "
+                   f"numbers match exactly, {len(CREDIT_KNOWN_DIFFERENCES)} known difference listed.")
+    return errors, log
+
+
 # --------------------------------------------------------------------------- 6. the models
 def check_models(reproduction, forecast, outlook):
     """The ported models must still reproduce the published articles on data to Sep 2026,
@@ -228,4 +270,5 @@ def validate(panel, parsed, latest, previous_meta):
     errors += check_ranges(panel)
     e, l = check_reference(parsed); errors += e; log += l
     e, l = check_article(panel); errors += e; log += l
+    e, l = check_credit_article(panel); errors += e; log += l
     return errors, log

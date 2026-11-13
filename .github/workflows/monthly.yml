@@ -1,0 +1,65 @@
+# Monthly data update for (+234) Money Matters (CLAUDE.md §4.5).
+#
+# Around the 10th of each month (and whenever started by hand from the Actions tab) this:
+#   1. installs the requirements
+#   2. runs the self-checks, then python pipeline/run_all.py (fetch -> clean -> build -> models -> validate)
+#   3. checks the app still renders with the new data
+#   4. if data/processed/ changed, commits it ("Monthly data update: data up to <month>") and pushes;
+#      Streamlit Cloud redeploys on the push.
+# If nothing changed it stops quietly. If anything fails the run turns red, nothing is committed,
+# and the app keeps the old data.
+
+name: Monthly data update
+
+on:
+  schedule:
+    - cron: "17 6 10 * *"   # 06:17 UTC on the 10th of every month
+  workflow_dispatch:         # "Run workflow" button in the Actions tab
+
+permissions:
+  contents: write            # to push the data commit
+
+concurrency:
+  group: monthly-data-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.15"   # the version the pipeline is built and tested with
+          cache: pip
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+
+      - name: Self-checks before the update
+        run: |
+          python src/money_math.py
+          python pipeline/track.py
+
+      - name: Run the pipeline (fails, and keeps the old data, if any check fails)
+        run: python pipeline/run_all.py
+
+      - name: Check the app still renders with the new data
+        run: python tests/smoke_test_app.py
+
+      - name: Commit the new data, if anything changed
+        run: |
+          if git diff --quiet -- data/processed; then
+            echo "No new data this month: nothing to commit."
+            exit 0
+          fi
+          LABEL=$(python -c "import json; print(json.load(open('data/processed/meta.json'))['latest_month_label'])")
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/processed data/forecasts data/raw
+          git commit -m "Monthly data update: data up to ${LABEL}"
+          git push

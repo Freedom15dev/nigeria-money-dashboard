@@ -1,14 +1,14 @@
 {
   "latest_month": "2026-09-01",
   "latest_month_label": "September 2026",
-  "built_at_utc": "2026-11-13T13:30:40+00:00",
+  "built_at_utc": "2026-11-13T15:06:35+00:00",
   "pulled_at_utc": {
-    "inflation": "2026-11-13T13:08:26+00:00",
-    "money_market": "2026-11-13T13:08:26+00:00",
-    "money_credit": "2026-11-13T13:08:26+00:00",
-    "exchange_rates": "2026-11-13T13:08:26+00:00",
-    "crude": "2026-11-13T13:08:26+00:00",
-    "us_cpi": "2026-11-13T13:08:26+00:00"
+    "inflation": "2026-11-13T13:40:41+00:00",
+    "money_market": "2026-11-13T13:40:41+00:00",
+    "money_credit": "2026-11-13T13:40:41+00:00",
+    "exchange_rates": "2026-11-13T13:40:41+00:00",
+    "crude": "2026-11-13T13:40:41+00:00",
+    "us_cpi": "2026-11-13T13:40:41+00:00"
   },
   "rows": {
     "panel": 285,
@@ -42,6 +42,8 @@
     "Known difference: usd_ngn 2024-07: nigeria-inflation-forecast had 1,557.5700, now 1,559.6515 (method: this month has a day listed twice with two different rates; naira-scenarios (and this dashboard) averages the two; this earlier project kept only one)",
     "Reference snapshot: every value up to Sep 2026 matches the four earlier projects, apart from the 12 known differences listed above.",
     "Savings article reproduced: all five options match to within ₦2.",
+    "Known difference from credit-squeeze: neg_prime published 72, now 71 (the prime rate's Sep 2025 glitch (11.90%) is treated as missing here; credit-squeeze counted it as a month with a negative real prime rate).",
+    "Credit article reproduced: 14 of 15 published numbers match exactly, 1 known difference listed.",
     "Models reproduce the articles on data to Sep 2026: all 43 published numbers match (inflation to 0.1 point, naira to the nearest ₦10).",
     "Forecast vintages: all 2 saved files unchanged.",
     "Vintage inflation_2026-09.csv already saved (published); left unchanged.",

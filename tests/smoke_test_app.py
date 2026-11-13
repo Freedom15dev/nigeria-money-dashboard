@@ -1,13 +1,33 @@
-"""Smoke test: run each page headlessly and check it renders without errors, including silly inputs.
+"""Smoke test: run every page headlessly and check it renders without errors, shows the right numbers,
+and handles silly inputs.
+
+The expected numbers are computed from data/processed/ (not typed in), so the test still holds after each
+monthly update. Whether the models reproduce the published articles is checked in pipeline/validate.py.
 
     python tests/smoke_test_app.py
 """
 
+import json
+import sys
 from pathlib import Path
 
+import pandas as pd
 from streamlit.testing.v1 import AppTest
 
-APP = str(Path(__file__).resolve().parents[1] / "app" / "Home.py")
+ROOT = Path(__file__).resolve().parents[1]
+APP = str(ROOT / "app" / "Home.py")
+PROCESSED = ROOT / "data" / "processed"
+sys.path.insert(0, str(ROOT / "src"))
+from money_math import SAVINGS, savings_journey  # noqa: E402
+
+PANEL = pd.read_csv(PROCESSED / "panel.csv", parse_dates=["month"])
+META = json.loads((PROCESSED / "meta.json").read_text(encoding="utf-8"))
+FORECAST = pd.read_csv(PROCESSED / "forecast.csv", parse_dates=["month"])
+OUTLOOK = pd.read_csv(PROCESSED / "naira_outlook.csv", parse_dates=["month"])
+SCEN = pd.read_csv(PROCESSED / "naira_scenarios.csv", parse_dates=["month"])
+CARDS = pd.read_csv(PROCESSED / "forecast_scorecard.csv", parse_dates=["next_check"])
+LATEST = pd.Timestamp(META["latest_month"])
+NOW = PANEL.set_index("month").loc[LATEST]
 
 
 def run(page=None, state=None, setup=None):
@@ -31,88 +51,115 @@ def everything(at):
     return " ".join(parts)
 
 
+def means(text):
+    return text.split("What this means</h2><p>")[1].split("</p>")[0]
+
+
+def naira(x):
+    return f"₦{x:,.0f}"
+
+
+def ten(x):
+    return f"₦{round(x, -1):,.0f}"
+
+
+def pct(x):
+    return f"{x:.2f}%"
+
+
 def main():
-    at = run()
-    text = everything(at)
+    print(f"Data up to {META['latest_month_label']}")
+
+    # ---------------------------------------------------------------- Home
+    text = everything(run())
     assert "Understand what the economy is doing to your money." in text
     assert text.count('class="mm-card mm-kpi"') == 7, text.count('class="mm-card mm-kpi"')
-    assert "Data up to <b>September 2026</b>" in text
-    assert "14.63%" in text and "5.36%" in text and "8.1%" in text
+    assert f"Data up to <b>{META['latest_month_label']}</b>" in text
+    assert pct(NOW["inflation"]) in text and pct(NOW["savingsDeposit"]) in text
     print("ok  Home renders: header, hero sentence, 7 key numbers, data-up-to label")
 
-    at = run("views/savings.py")
-    text = everything(at)
-    assert "₦208,347" in text and "₦13,459" in text, "savings spot-check not on screen"
-    assert "Lost 86.5% of its value" in text
-    assert "none of these options kept up with prices" in text
-    print("ok  My savings (defaults): savings account ₦208,347, buys what ₦13,459 bought, badge in words")
-    print("    What this means:", text.split("What this means</h2><p>")[1].split("</p>")[0])
-
-    at = run("views/savings.py", state={"start_year": 2025})
-    text = everything(at)
-    print("    From Jan 2025:", text.split("What this means</h2><p>")[1].split("</p>")[0])
+    # ---------------------------------------------------------------- My savings
+    j = savings_journey(PANEL, 100_000, "2006-01-01").summary.loc[SAVINGS]
+    text = everything(run("views/savings.py"))
+    assert naira(j["naira_today"]) in text and naira(j["buys_what_then"]) in text, "savings result not on screen"
+    assert f"Lost {abs(j['real_change_pct']):.1f}% of its value" in text
+    print(f"ok  My savings (defaults): savings account {naira(j['naira_today'])}, buys what "
+          f"{naira(j['buys_what_then'])} bought, badge in words")
+    print("    What this means:", means(text))
 
     at = run("views/savings.py", setup=lambda a: a.text_input(key="amount").set_value("0"))
     assert "above ₦0" in everything(at)
-    print("ok  ₦0 gives a friendly message")
-
     at = run("views/savings.py", setup=lambda a: a.text_input(key="amount").set_value("abc"))
     assert "Type the amount in naira" in everything(at)
-    print("ok  'abc' gives a friendly message")
+    print("ok  ₦0 and 'abc' give friendly messages")
 
     at = run("views/savings.py", setup=lambda a: a.text_input(key="amount").set_value("1m"))
     assert at.session_state["amount"] == "1,000,000" and at.session_state["quick"] == "₦1m"
-    assert "₦2,083,4" in everything(at)  # ₦1m in a savings account from Jan 2006 = 10 x ₦208,346.6
+    j1m = savings_journey(PANEL, 1_000_000, "2006-01-01").summary.loc[SAVINGS]
+    assert naira(j1m["naira_today"]) in everything(at)
     print("ok  typing '1m' becomes 1,000,000, selects the ₦1m quick pick, results scale")
 
-    at = run("views/savings.py", state={"start_month": "December", "start_year": 2026})
+    at = run("views/savings.py", state={"start_month": "December", "start_year": LATEST.year})
     assert "Data only goes up to" in everything(at) or "before the end month" in everything(at)
-    print("ok  start after the latest month gives a friendly message")
-
-    at = run("views/savings.py", state={"start_month": "September", "start_year": 2026})
+    at = run("views/savings.py", state={"start_month": f"{LATEST:%B}", "start_year": LATEST.year})
     assert "before the end month" in everything(at)
-    print("ok  start = latest month gives a friendly message")
+    print("ok  start after or equal to the latest month gives a friendly message")
 
     at = run("views/savings.py", state={"kept": []})
     assert "Pick where the money was kept" in everything(at)
     print("ok  nothing ticked: mattress baseline still shown, with a hint")
+
     # ---------------------------------------------------------------- Prices
-    at = run("views/prices.py")
-    text = everything(at)
-    assert "How fast are prices rising?" in text and "14.63%" in text and "19.59%" in text
-    assert "6.5% to 22.4%" in text, "Sep 2027 headline range (article: 6.5 to 22.4) not on screen"
-    assert "The January 2025 rebasing" in text and "What this means" in text
-    print("ok  Prices renders: hero, key numbers, chart, 2025 note, forecast range 6.5% to 22.4% for Sep 2027")
-    print("    What this means:", text.split("What this means</h2><p>")[1].split("</p>")[0])
+    text = everything(run("views/prices.py"))
+    head = FORECAST[FORECAST["measure"] == "headline"].iloc[-1]
+    rng = f"{head['low80']:.1f}% to {head['high80']:.1f}%"
+    assert "How fast are prices rising?" in text and pct(NOW["inflation"]) in text and pct(NOW["food_inflation"]) in text
+    assert rng in text, f"headline forecast range {rng} not on screen"
+    assert "The January 2025 rebasing" in text
+    print(f"ok  Prices renders: hero, key numbers, chart, 2025 note, forecast range {rng} for {head['month']:%b %Y}")
+    print("    What this means:", means(text))
+    food = FORECAST[FORECAST["measure"] == "food"].iloc[-1]
     at = run("views/prices.py", state={"infl_measures": [], "infl_period": "Since 2003", "fc_measure": "Food"})
-    assert "7.8% to 31.4%" in everything(at), "Sep 2027 food range (article: 7.8 to 31.4) not on screen"
-    print("ok  Prices with no measure ticked falls back to headline; food forecast range 7.8% to 31.4%")
+    assert f"{food['low80']:.1f}% to {food['high80']:.1f}%" in everything(at)
+    print("ok  Prices with no measure ticked falls back to headline; food forecast range shown")
 
     # ---------------------------------------------------------------- The naira
-    at = run("views/naira.py")
-    text = everything(at)
-    assert "How much is the naira worth?" in text and "₦1,326.81" in text
-    for rng in ["₦1,130 – ₦2,030", "₦1,090 – ₦3,390", "₦1,090 – ₦6,870"]:
-        assert rng in text, f"outlook range {rng} not on screen"
-    print("ok  The naira renders: hero, history, outlook ranges match the article (Sep 2027/2028/2030)")
-    print("    What this means:", text.split("What this means</h2><p>")[1].split("</p>")[0])
-    published = {"Stable reforms": "₦1,230 – ₦2,010", "History repeats": "₦1,390 – ₦3,000",
-                 "Oil shock": "₦2,090 – ₦4,500", "Policy reversal": "₦2,060 – ₦3,440"}
-    for name, rng in published.items():
+    text = everything(run("views/naira.py"))
+    assert "How much is the naira worth?" in text and f"₦{NOW['usd_ngn']:,.2f}" in text
+    start = OUTLOOK["month"].min()
+    for m in (12, 24, 48):
+        r = OUTLOOK.set_index("month").loc[start + pd.DateOffset(months=m - 1)]
+        assert f"{ten(r['low80'])} – {ten(r['high80'])}" in text, f"outlook range for +{m} months not on screen"
+    print("ok  The naira renders: hero, history, outlook ranges at 1, 2 and 4 years")
+    print("    What this means:", means(text))
+    end = SCEN[SCEN["month"] == SCEN["month"].max()].set_index("scenario")
+    for name, r in end.iterrows():
         at = run("views/naira.py", state={"scenario": name, "fx_scale": "Log", "fx_period": "Last 2 years"})
-        assert rng in everything(at), f"{name}: {rng} not on screen"
-    print("ok  all four scenarios show the article's Sep 2030 ranges; log scale and short period render")
+        assert f"{ten(r['low80'])} – {ten(r['high80'])}" in everything(at), f"{name} range not on screen"
+    print("ok  all four scenarios show their ranges; log scale and short period render")
 
-    # ---------------------------------------------------------------- forecast tracker
-    at = run("views/prices.py")
-    text = everything(at)
-    assert "How are the forecasts doing?" in text and "First check is in <b>October 2026</b>" in text.replace("first", "First")
-    assert "never redrawn" in text
-    print("ok  Prices tracker: published Sep 2026 forecast, first check October 2026")
-    at = run("views/naira.py")
-    text = everything(at)
-    assert "<b>September 2027</b>" in text and "Only 3 dates were published" in text
-    print("ok  Naira tracker: published outlook, first check September 2027 (only 3 dates published)")
+    # ---------------------------------------------------------------- Borrowing
+    text = everything(run("views/borrowing.py"))
+    assert "What does it cost to borrow?" in text
+    assert pct(NOW["primeLending"]) in text and pct(NOW["maxLending"]) in text
+    assert "Work out your own loan" in text and "naija-loan-cost.streamlit.app" in text
+    print("ok  Borrowing renders: prime and maximum rates, three charts, loan calculator link")
+    print("    What this means:", means(text))
+    at = run("views/borrowing.py", state={"borrow_period": "Last 2 years"})
+    print("ok  Borrowing with a short period renders")
+
+    # ---------------------------------------------------------------- forecast trackers
+    text = everything(run("views/prices.py"))
+    assert "How are the forecasts doing?" in text and "never redrawn" in text
+    first = CARDS[(CARDS["model"] == "inflation") & (CARDS["series"] == "headline")].iloc[0]
+    if first["checked"] == 0:
+        assert f"<b>{first['next_check']:%B %Y}</b>" in text
+    else:
+        assert f"{int(first['inside80'])} of {int(first['checked'])}</b>" in text
+    print("ok  Prices tracker shows the earliest vintage's scorecard")
+    text = everything(run("views/naira.py"))
+    assert "How are the forecasts doing?" in text and "never redrawn" in text
+    print("ok  Naira tracker renders")
     print("All app smoke tests passed.")
 
 

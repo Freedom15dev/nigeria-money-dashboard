@@ -97,9 +97,26 @@ def build_panel(raw):
     # Real savings rate (Fisher): what a savings account pays after inflation, % per year.
     panel["real_savings_rate"] = real_rate(panel["savingsDeposit"], panel["inflation"])
 
+    # Borrowing (definitions from nigeria-credit-squeeze): the gap between what risky and prime
+    # borrowers pay, lending rates after inflation (Fisher), and government's share of credit.
+    panel["lending_gap"] = panel["maxLending"] - panel["primeLending"]
+    panel["real_prime"] = real_rate(panel["primeLending"], panel["inflation"])
+    panel["real_max"] = real_rate(panel["maxLending"], panel["inflation"])
+    panel["gov_share"] = panel["creditToGovernment"] / panel["netDomesticCredit"] * 100
+
     panel["june_2025_interpolated"] = panel["month"].eq("2025-06-01") & ("June repeated May" in log[0])
     panel["tbill_missing"] = panel["treasuryBill"].isna() & panel["month"].ge("2006-01-01")
     panel = clean.add_rate_chart_columns(panel)
+    # Chart-only versions (gaps such as prime Sep 2025 and credit Mar 2026 drawn as straight lines)
+    panel["lending_gap_chart"] = panel["maxLending_chart"] - panel["primeLending_chart"]
+    panel["real_prime_chart"] = real_rate(panel["primeLending_chart"], panel["inflation"])
+    panel["real_max_chart"] = real_rate(panel["maxLending_chart"], panel["inflation"])
+    # As in nigeria-credit-squeeze: the share only means something while government is a net
+    # BORROWER. While its credit was negative (2006-2014, a net lender) the "share" swings wildly
+    # (e.g. 990% in Jan 2007, when net domestic credit was near zero), so charts shade those months.
+    panel["gov_net_lender"] = panel["creditToGovernment"] < 0
+    panel["gov_share_chart"] = (panel["creditToGovernment_chart"] / panel["netDomesticCredit_chart"] * 100).where(
+        panel["creditToGovernment_chart"] > 0)
 
     # Gaps made on purpose by the fixes, so validate.py accepts exactly these and nothing else.
     panel.attrs["fixed_gaps"] = set(spike_gaps)
