@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>My savings · (+234) Money Matters</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F5F6F8}
+a{color:#2A6FDB}a:hover{color:#1B4FA8}
+</style>
+</helmet>
+<div style="min-height: 100%; background: #F5F6F8; font-family: Inter, Arial, sans-serif; color: #0F1E33;">
+
+  <header style="background: #FFFFFF; border-bottom: 1px solid #E3E6EB;">
+    <div style="max-width: 1120px; margin: 0 auto; padding: 16px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 16px 32px;">
+      <a href="Home.dc.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #0F1E33;">
+        <span style="display: inline-flex; align-items: center; justify-content: center; height: 34px; padding: 0 10px; border-radius: 8px; background: #0F1E33; color: #FFFFFF; font-family: 'Space Grotesk', Arial, sans-serif; font-weight: 700; font-size: 14px;">+234</span>
+        <span style="font-family: 'Space Grotesk', Arial, sans-serif; font-weight: 700; font-size: 20px;">Money Matters</span>
+      </a>
+      <nav aria-label="Main" style="display: flex; flex-wrap: wrap; gap: 4px; flex: 1 1 auto;">
+        <a href="Home.dc.html" style="padding: 8px 12px; border-radius: 8px; font-size: 15px; font-weight: 500; color: #4A5568; text-decoration: none;">Home</a>
+        <a href="Main.dc.html" aria-current="page" style="padding: 8px 12px; border-radius: 8px; font-size: 15px; font-weight: 600; color: #0F1E33; background: #EAF1FC; text-decoration: none;">My savings</a>
+        <a href="#" style="padding: 8px 12px; border-radius: 8px; font-size: 15px; font-weight: 500; color: #4A5568; text-decoration: none;">Prices</a>
+        <a href="#" style="padding: 8px 12px; border-radius: 8px; font-size: 15px; font-weight: 500; color: #4A5568; text-decoration: none;">The naira</a>
+        <a href="#" style="padding: 8px 12px; border-radius: 8px; font-size: 15px; font-weight: 500; color: #4A5568; text-decoration: none;">Borrowing</a>
+      </nav>
+      <p style="margin: 0; font-size: 14px; color: #4A5568;">Data up to <b style="color: #0F1E33;">September 2026</b></p>
+    </div>
+  </header>
+
+  <main style="max-width: 1120px; margin: 0 auto; padding: 48px 24px 64px; display: flex; flex-direction: column; gap: 32px;">
+
+    <section style="display: flex; flex-direction: column; gap: 12px; max-width: 760px;">
+      <p style="margin: 0; font-size: 13px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #B4561A;">My savings</p>
+      <h1 style="margin: 0; font-family: 'Space Grotesk', Arial, sans-serif; font-size: 48px; line-height: 1.08; font-weight: 700;">What is your money worth today?</h1>
+      <p style="margin: 0; font-size: 18px; line-height: 1.55; color: #4A5568;">See how rising prices changed the value of money you saved, and where it held up best.</p>
+    </section>
+
+    <section aria-label="Your savings" style="background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 24px;">
+      <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+        <div style="flex: 2 1 300px; display: flex; flex-direction: column; gap: 8px;">
+          <label for="amt" style="font-size: 14px; font-weight: 600;">Amount saved</label>
+          <div style="display: flex; align-items: center; border: 1.5px solid #CBD2DC; border-radius: 10px; background: #FFFFFF; height: 52px; padding: 0 16px; gap: 8px;">
+            <span style="font-size: 20px; font-weight: 600; color: #4A5568;">₦</span>
+            <input id="amt" value="100,000" style="border: none; outline: none; font-family: Inter, Arial, sans-serif; font-size: 20px; font-weight: 600; color: #0F1E33; width: 100%; background: transparent;">
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <button style="height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid #CBD2DC; background: #FFFFFF; font-family: Inter, Arial, sans-serif; font-size: 14px; color: #0F1E33; cursor: pointer;">₦50k</button>
+            <button style="height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid #2A6FDB; background: #EAF1FC; font-family: Inter, Arial, sans-serif; font-size: 14px; font-weight: 600; color: #1B4FA8; cursor: pointer;">₦100k</button>
+            <button style="height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid #CBD2DC; background: #FFFFFF; font-family: Inter, Arial, sans-serif; font-size: 14px; color: #0F1E33; cursor: pointer;">₦500k</button>
+            <button style="height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid #CBD2DC; background: #FFFFFF; font-family: Inter, Arial, sans-serif; font-size: 14px; color: #0F1E33; cursor: pointer;">₦1m</button>
+          </div>
+        </div>
+        <div style="flex: 1 1 160px; display: flex; flex-direction: column; gap: 8px;">
+          <label for="mon" style="font-size: 14px; font-weight: 600;">Saved from</label>
+          <select id="mon" style="height: 52px; border: 1.5px solid #CBD2DC; border-radius: 10px; padding: 0 14px; font-family: Inter, Arial, sans-serif; font-size: 16px; color: #0F1E33; background: #FFFFFF;"><option>January</option></select>
+        </div>
+        <div style="flex: 1 1 120px; display: flex; flex-direction: column; gap: 8px;">
+          <label for="yr" style="font-size: 14px; font-weight: 600;">Year</label>
+          <select id="yr" style="height: 52px; border: 1.5px solid #CBD2DC; border-radius: 10px; padding: 0 14px; font-family: Inter, Arial, sans-serif; font-size: 16px; color: #0F1E33; background: #FFFFFF;"><option>2025</option></select>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <p style="margin: 0; font-size: 14px; font-weight: 600;">Where was it kept? <span style="font-weight: 400; color: #4A5568;">Pick any to compare</span></p>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          <button aria-pressed="true" style="height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #0F1E33; background: #0F1E33; font-family: Inter, Arial, sans-serif; font-size: 14px; font-weight: 600; color: #FFFFFF; cursor: pointer;">✓ Savings account</button>
+          <button aria-pressed="true" style="height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #0F1E33; background: #0F1E33; font-family: Inter, Arial, sans-serif; font-size: 14px; font-weight: 600; color: #FFFFFF; cursor: pointer;">✓ 12-month fixed deposit</button>
+          <button aria-pressed="true" style="height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #0F1E33; background: #0F1E33; font-family: Inter, Arial, sans-serif; font-size: 14px; font-weight: 600; color: #FFFFFF; cursor: pointer;">✓ Treasury bills</button>
+          <button aria-pressed="true" style="height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #0F1E33; background: #0F1E33; font-family: Inter, Arial, sans-serif; font-size: 14px; font-weight: 600; color: #FFFFFF; cursor: pointer;">✓ Dollars</button>
+          <button aria-pressed="true" style="height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #0F1E33; background: #0F1E33; font-family: Inter, Arial, sans-serif; font-size: 14px; font-weight: 600; color: #FFFFFF; cursor: pointer;">✓ Under the mattress</button>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="The answer" style="background: #0F1E33; color: #FFFFFF; border-radius: 20px; padding: 36px; display: flex; flex-wrap: wrap; gap: 32px; align-items: center;">
+      <div style="flex: 3 1 420px; display: flex; flex-direction: column; gap: 14px;">
+        <p style="margin: 0; font-size: 16px; color: #B8C6DA;">₦100,000 kept in a <b style="color: #FFFFFF;">savings account</b> since January 2025</p>
+        <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px 20px;">
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <span style="font-size: 13px; color: #B8C6DA;">In the account today</span>
+            <span style="font-family: 'Space Grotesk', Arial, sans-serif; font-size: 44px; font-weight: 700;">₦113,080</span>
+          </div>
+          <span aria-hidden="true" style="font-size: 32px; color: #F0A65E;">→</span>
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <span style="font-size: 13px; color: #B8C6DA;">Worth in today's prices</span>
+            <span style="font-family: 'Space Grotesk', Arial, sans-serif; font-size: 44px; font-weight: 700; color: #F0A65E;">₦84,082</span>
+          </div>
+        </div>
+        <p style="margin: 0; display: inline-flex; align-self: flex-start; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; background: #FDECEA; color: #9B1C1C; font-size: 15px; font-weight: 700;">Lost 15.9% of its value</p>
+      </div>
+      <div style="flex: 2 1 260px; display: flex; flex-direction: column; gap: 8px; border-top: 1px solid #2B3B55; padding-top: 20px;">
+        <p style="margin: 0; font-size: 15px; line-height: 1.55; color: #D7DFEA;">Prices are <b style="color: #FFFFFF;">1.34 times</b> what they were in January 2025.</p>
+        <p style="margin: 0; font-size: 15px; line-height: 1.55; color: #D7DFEA;">You'd need <b style="color: #FFFFFF;">₦134,487</b> today to buy what ₦100,000 bought then.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="cmp" style="display: flex; flex-direction: column; gap: 16px;">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px;">
+        <h2 id="cmp" style="margin: 0; font-family: 'Space Grotesk', Arial, sans-serif; font-size: 28px; font-weight: 700;">How each option did</h2>
+        <p style="margin: 0; font-size: 14px; color: #4A5568;">Best to worst, in today's prices</p>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 16px;">
+
+        <article style="flex: 1 1 190px; background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 13px; font-weight: 700; color: #2A6FDB;">#1</span>
+            <span style="padding: 3px 9px; border-radius: 999px; background: #FDECEA; color: #9B1C1C; font-size: 13px; font-weight: 700;">−2.5%</span>
+          </div>
+          <h3 style="margin: 0; font-size: 17px; font-weight: 700;">Treasury bills</h3>
+          <p style="margin: 0; font-family: 'Space Grotesk', Arial, sans-serif; font-size: 26px; font-weight: 700;">₦97,531</p>
+          <p style="margin: 0; font-size: 13px; color: #4A5568;">₦131,166 in naira today</p>
+          <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #4A5568;">Came closest to keeping up with prices.</p>
+        </article>
+
+        <article style="flex: 1 1 190px; background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 13px; font-weight: 700; color: #2A6FDB;">#2</span>
+            <span style="padding: 3px 9px; border-radius: 999px; background: #FDECEA; color: #9B1C1C; font-size: 13px; font-weight: 700;">−8.4%</span>
+          </div>
+          <h3 style="margin: 0; font-size: 17px; font-weight: 700;">12-month fixed deposit</h3>
+          <p style="margin: 0; font-family: 'Space Grotesk', Arial, sans-serif; font-size: 26px; font-weight: 700;">₦91,576</p>
+          <p style="margin: 0; font-size: 13px; color: #4A5568;">₦123,158 in naira today</p>
+          <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #4A5568;">Rolled over each year at the rate then.</p>
+        </article>
+
+        <article style="flex: 1 1 190px; background: #FFFFFF; border: 2px solid #0F1E33; border-radius: 14px; padding: 19px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 13px; font-weight: 700; color: #2A6FDB;">#3</span>
+            <span style="padding: 3px 9px; border-radius: 999px; background: #FDECEA; color: #9B1C1C; font-size: 13px; font-weight: 700;">−15.9%</span>
+          </div>
+          <h3 style="margin: 0; font-size: 17px; font-weight: 700;">Savings account</h3>
+          <p style="margin: 0; font-family: 'Space Grotesk', Arial, sans-serif; font-size: 26px; font-weight: 700;">₦84,082</p>
+          <p style="margin: 0; font-size: 13px; color: #4A5568;">₦113,080 in naira today</p>
+          <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #4A5568;">The rate fell from 7.5% to 5.4% a year.</p>
+        </article>
+
+        <article style="flex: 1 1 190px; background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 13px; font-weight: 700; color: #2A6FDB;">#4</span>
+            <span style="padding: 3px 9px; border-radius: 999px; background: #FDECEA; color: #9B1C1C; font-size: 13px; font-weight: 700;">−25.6%</span>
+          </div>
+          <h3 style="margin: 0; font-size: 17px; font-weight: 700;">Under the mattress</h3>
+          <p style="margin: 0; font-family: 'Space Grotesk', Arial, sans-serif; font-size: 26px; font-weight: 700;">₦74,357</p>
+          <p style="margin: 0; font-size: 13px; color: #4A5568;">₦100,000 in naira today</p>
+          <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #4A5568;">Earned nothing while prices rose.</p>
+        </article>
+
+        <article style="flex: 1 1 190px; background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 13px; font-weight: 700; color: #2A6FDB;">#5</span>
+            <span style="padding: 3px 9px; border-radius: 999px; background: #FDECEA; color: #9B1C1C; font-size: 13px; font-weight: 700;">−35.7%</span>
+          </div>
+          <h3 style="margin: 0; font-size: 17px; font-weight: 700;">Dollars</h3>
+          <p style="margin: 0; font-family: 'Space Grotesk', Arial, sans-serif; font-size: 26px; font-weight: 700;">₦64,253</p>
+          <p style="margin: 0; font-size: 13px; color: #4A5568;">₦86,412 in naira today</p>
+          <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #4A5568;">The naira strengthened from ₦1,535 to ₦1,327 per $1.</p>
+        </article>
+
+      </div>
+    </section>
+
+    <section aria-labelledby="chart" style="background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 18px;">
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <h2 id="chart" style="margin: 0; font-family: 'Space Grotesk', Arial, sans-serif; font-size: 22px; font-weight: 700;">Value in today's prices, month by month</h2>
+        <p style="margin: 0; font-size: 14px; color: #4A5568;">Below the dashed line, your money buys less than when you saved it.</p>
+      </div>
+      <div style="display: flex; gap: 12px;">
+        <div aria-hidden="true" style="display: flex; flex-direction: column; justify-content: space-between; font-size: 12px; color: #4A5568; padding: 2px 0 26px; text-align: right; width: 56px;">
+          <span>₦110k</span><span>₦100k</span><span>₦90k</span><span>₦80k</span><span>₦70k</span><span>₦60k</span>
+        </div>
+        <div style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 6px;">
+          <svg role="img" aria-label="Real value of ₦100,000 from January 2025 to September 2026: Treasury bills ₦97,531, fixed deposit ₦91,576, savings account ₦84,082, under the mattress ₦74,357, dollars ₦64,253." viewBox="0 0 640 260" preserveAspectRatio="none" style="width: 100%; height: 280px; display: block;">
+            <g stroke="#EEF0F3" stroke-width="1">
+              <line x1="0" y1="0" x2="640" y2="0"/><line x1="0" y1="94.5" x2="640" y2="94.5"/><line x1="0" y1="141.8" x2="640" y2="141.8"/><line x1="0" y1="189" x2="640" y2="189"/><line x1="0" y1="236.4" x2="640" y2="236.4"/>
+            </g>
+            <line x1="0" y1="47.3" x2="640" y2="47.3" stroke="#0F1E33" stroke-width="1.5" stroke-dasharray="6 5"/>
+            <polyline fill="none" stroke="#2A6FDB" stroke-width="3" vector-effect="non-scaling-stroke" points="0,47 32,49 64,52 96,55 128,57 160,58 192,60 224,62 256,63 288,64 320,65 352,64 384,64 416,63 448,63 480,62 512,62 544,61 576,61 608,60 640,59"/>
+            <polyline fill="none" stroke="#7FA9EC" stroke-width="3" vector-effect="non-scaling-stroke" points="0,47 32,51 64,55 96,59 128,63 160,66 192,70 224,73 256,75 288,77 320,78 352,78 384,79 416,80 448,81 480,82 512,83 544,84 576,85 608,86 640,87"/>
+            <polyline fill="none" stroke="#0F1E33" stroke-width="3" vector-effect="non-scaling-stroke" points="0,47 32,53 64,60 96,66 128,72 160,78 192,83 224,88 256,92 288,96 320,99 352,101 384,103 416,106 448,108 480,111 512,113 544,116 576,118 608,120 640,123"/>
+            <polyline fill="none" stroke="#8A94A6" stroke-width="3" stroke-dasharray="2 4" vector-effect="non-scaling-stroke" points="0,47 32,56 64,66 96,75 128,83 160,91 192,99 224,106 256,113 288,119 320,124 352,129 384,133 416,138 448,142 480,147 512,151 544,156 576,160 608,164 640,168"/>
+            <polyline fill="none" stroke="#D9822B" stroke-width="3" vector-effect="non-scaling-stroke" points="0,47 32,67 64,68 96,57 128,66 160,87 192,101 224,107 256,123 288,139 320,148 352,150 384,163 416,183 448,181 480,189 512,191 544,196 576,198 608,207 640,216"/>
+          </svg>
+          <div aria-hidden="true" style="display: flex; justify-content: space-between; font-size: 12px; color: #4A5568;">
+            <span>Jan 2025</span><span>Jul 2025</span><span>Jan 2026</span><span>Sep 2026</span>
+          </div>
+        </div>
+      </div>
+      <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 10px 22px; font-size: 14px;">
+        <li style="display: flex; align-items: center; gap: 8px;"><span style="width: 18px; height: 4px; border-radius: 2px; background: #2A6FDB;"></span>Treasury bills</li>
+        <li style="display: flex; align-items: center; gap: 8px;"><span style="width: 18px; height: 4px; border-radius: 2px; background: #7FA9EC;"></span>12-month fixed deposit</li>
+        <li style="display: flex; align-items: center; gap: 8px;"><span style="width: 18px; height: 4px; border-radius: 2px; background: #0F1E33;"></span>Savings account</li>
+        <li style="display: flex; align-items: center; gap: 8px;"><span style="width: 18px; height: 4px; border-radius: 2px; background: #8A94A6;"></span>Under the mattress</li>
+        <li style="display: flex; align-items: center; gap: 8px;"><span style="width: 18px; height: 4px; border-radius: 2px; background: #D9822B;"></span>Dollars</li>
+      </ul>
+    </section>
+
+    <section style="background: #FDF3E8; border-radius: 16px; padding: 24px 28px; display: flex; flex-direction: column; gap: 8px;">
+      <h2 style="margin: 0; font-family: 'Space Grotesk', Arial, sans-serif; font-size: 20px; font-weight: 700;">What this means</h2>
+      <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #2D3A4F;">Since January 2025, none of these options kept up with prices. Treasury bills came closest. Dollars did worst over this period because the naira strengthened, but over longer periods the picture changes. Try an earlier start year to see.</p>
+    </section>
+
+    <details style="background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 12px; padding: 18px 22px;">
+      <summary style="font-size: 15px; font-weight: 600; cursor: pointer;">How each option is worked out</summary>
+      <p style="margin: 12px 0 0; font-size: 14px; line-height: 1.6; color: #4A5568;">Savings account and Treasury bills grow each month at the CBN average rate ÷ 12. The fixed deposit rolls over every 12 months at the rate then. Dollars are bought at the starting month's official rate and sold at the latest. "Today's prices" uses a price index built from CBN inflation. Real accounts, taxes and fees differ.</p>
+    </details>
+
+  </main>
+
+  <footer style="border-top: 1px solid #E3E6EB; background: #FFFFFF;">
+    <div style="max-width: 1120px; margin: 0 auto; padding: 24px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 13px; color: #4A5568;">
+      <p style="margin: 0;">Educational, not financial advice. Data: Central Bank of Nigeria.</p>
+      <p style="margin: 0;">Built by Freedom Oboh · <a href="#">GitHub</a> · <a href="#">LinkedIn</a> · <a href="#">Articles</a></p>
+    </div>
+  </footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":2280}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,9 +1,18 @@
 [theme]
 base = "light"
 primaryColor = "#2A6FDB"
-backgroundColor = "#FFFFFF"
-secondaryBackgroundColor = "#F3F5F8"
+backgroundColor = "#F5F6F8"
+secondaryBackgroundColor = "#FFFFFF"
 textColor = "#0F1E33"
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+headingFont = "'Space Grotesk':https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap"
+borderColor = "#CBD2DC"
+showWidgetBorder = true
+baseRadius = "10px"
+
+[client]
+# Hide the developer toolbar and the Deploy button from visitors.
+toolbarMode = "minimal"
 
 [browser]
 gatherUsageStats = false

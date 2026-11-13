@@ -1,20 +1,22 @@
-"""Shared pieces for every page: data loading, formatting, KPI cards, chart style, footer.
+"""Shared pieces for every page: data loading, formatting, the house CSS, the brand header,
+cards, badges, chart style and the footer. Layout follows the mockups in design/.
 
 The app only ever reads data/processed/. It never calls the CBN.
 """
 
+import html
 import json
 import sys
 from pathlib import Path
 
 import pandas as pd
-import plotly.graph_objects as go
 import streamlit as st
 
 ROOT = Path(__file__).resolve().parents[1]
 PROCESSED = ROOT / "data" / "processed"
 sys.path.insert(0, str(ROOT / "src"))
 
+# --------------------------------------------------------------------------- wording (CLAUDE.md §0)
 APP_NAME = "(+234) Money Matters"
 TAGLINE = "Understand what the economy is doing to your money."
 SUPPORTING_LINE = "Nigeria's economy, through the numbers."
@@ -28,7 +30,8 @@ DESCRIPTION = (
     "monthly updates."
 )
 LOAN_CALCULATOR_URL = "https://naija-loan-cost.streamlit.app/"
-GITHUB_URL = "https://github.com/Freedom15dev"
+GITHUB_URL = "https://github.com/Freedom15dev/nigeria-money-dashboard"
+LINKEDIN_URL = None  # profile link still to come; the footer shows the articles meanwhile
 ARTICLES = {
     "Inflation": "https://www.linkedin.com/pulse/i-analysed-23-years-nigerian-inflation-data-heres-what-freedom-oboh-vumkf",
     "Savings": "https://www.linkedin.com/pulse/i-followed-100000-20-years-heres-what-happened-nigerian-freedom-oboh-o090f",
@@ -36,16 +39,22 @@ ARTICLES = {
     "Borrowing": "https://www.linkedin.com/pulse/who-gets-borrow-nigeria-i-followed-two-borrowers-find-freedom-oboh-q6mof",
 }
 
-NAVY, BLUE, ORANGE, GREY, GRID = "#0F1E33", "#2A6FDB", "#D9822B", "#8A94A6", "#E3E6EB"
+# Pages in the header. url=None means not built yet (shown as "soon").
+NAV = [("Home", "/"), ("My savings", "/savings"), ("Prices", None), ("The naira", None), ("Borrowing", None)]
+
+# --------------------------------------------------------------------------- colours (design/)
+NAVY, BLUE, ORANGE, ORANGE_LIGHT = "#0F1E33", "#2A6FDB", "#D9822B", "#F0A65E"
+PAGE, GREY, GRID, MUTED = "#F5F6F8", "#8A94A6", "#EEF0F3", "#4A5568"
+GOOD, BAD = "#1D6B44", "#9B1C1C"
 OPTION_COLORS = {
+    "Treasury bills": BLUE,
+    "12-month fixed deposit": "#7FA9EC",
+    "Savings account": NAVY,
     "Under the mattress": GREY,
-    "Savings account": BLUE,
-    "12-month fixed deposit": NAVY,
-    "Treasury bills": "#2E9E6B",
     "Dollars": ORANGE,
 }
 
-# Plain-words help for every term (shown on hover of the ⓘ next to a label).
+# Plain-words help for every term.
 HELP = {
     "inflation": "How much prices are higher than 12 months ago (year-on-year headline inflation, NBS via the CBN).",
     "usd": "The official CBN rate: how many naira one US dollar costs, averaged over the month. Not the street (parallel) rate.",
@@ -54,8 +63,9 @@ HELP = {
     "max": "The maximum lending rate: the average rate banks charge their riskiest borrowers. Small businesses and individuals often pay this or more.",
     "savings": "The average interest a bank savings account pays in a year, before tax (CBN average across banks).",
     "real": "The real rate is the interest rate after inflation. Below zero means money in the account buys less each year, even though the balance grows.",
-    "todays_prices": "'Today's prices' means the prices of the latest month in the data. We use a price index built from the inflation figures.",
 }
+
+e = html.escape  # short name for escaping text put into HTML
 
 
 # --------------------------------------------------------------------------- data
@@ -73,71 +83,329 @@ def load_meta():
 def naira(x, decimals=0):
     if pd.isna(x):
         return "–"
-    sign = "−" if x < 0 else ""
-    return f"{sign}₦{abs(x):,.{decimals}f}"
+    return f"{'−' if x < 0 else ''}₦{abs(x):,.{decimals}f}"
 
 
-def pct(x, decimals=2, signed=False):
+def pct(x, decimals=2):
     if pd.isna(x):
         return "–"
-    text = f"{abs(x):.{decimals}f}%"
-    if signed:
-        return ("+" if x > 0 else "−" if x < 0 else "") + text
-    return ("−" if x < 0 else "") + text
+    return f"{'−' if x < 0 else ''}{abs(x):.{decimals}f}%"
 
 
-def points(x, decimals=2):
-    """A change in a rate, in percentage points, for st.metric deltas.
+def short_naira(x):
+    """₦50k, ₦1.5m: for axis ticks and quick picks."""
+    if abs(x) >= 1_000_000:
+        return f"₦{x / 1_000_000:,.3g}m"
+    if abs(x) >= 1_000:
+        return f"₦{x / 1_000:,.3g}k"
+    return f"₦{x:,.0f}"
 
-    Uses a plain hyphen for minus: st.metric reads the sign from it to pick the arrow and colour.
-    """
-    if pd.isna(x):
-        return None
-    return f"{x:+.{decimals}f} pts"
+
+# --------------------------------------------------------------------------- CSS
+CSS = """
+<style>
+/* ---------- page ---------- */
+.stApp {background: #F5F6F8;}
+[data-testid="stAppViewContainer"], .stMain {overflow-x: hidden;}
+[data-testid="stMainBlockContainer"], .block-container {
+  max-width: 1120px; padding: 0 24px 0 24px;
+}
+/* Streamlit's own top bar, toolbar, deploy button and heading link icons: hidden for visitors */
+header[data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stAppDeployButton"],
+[data-testid="stDecoration"], [data-testid="stHeaderActionElements"] {display: none !important;}
+h1 a, h2 a, h3 a {display: none !important;}
+
+.mm, .mm p, .mm span, .mm a, .mm li {font-family: Inter, Arial, sans-serif;}
+.mm h1, .mm h2, .mm h3, .mm .num {font-family: 'Space Grotesk', Arial, sans-serif; letter-spacing: 0;}
+.mm p {margin: 0;}
+.mm a {color: #2A6FDB;} .mm a:hover {color: #1B4FA8;}
+
+/* ---------- brand header (full width) ---------- */
+.mm-header {background: #FFFFFF; border-bottom: 1px solid #E3E6EB; margin: 0 calc(50% - 50vw);}
+.mm-header-in {max-width: 1120px; margin: 0 auto; padding: 16px 24px; display: flex; flex-wrap: wrap;
+  align-items: center; gap: 16px 32px; box-sizing: border-box;}
+.mm-brand {display: flex; align-items: center; gap: 10px; text-decoration: none !important; color: #0F1E33 !important;}
+.mm-badge234 {display: inline-flex; align-items: center; height: 34px; padding: 0 10px; border-radius: 8px;
+  background: #0F1E33; color: #FFFFFF; font-family: 'Space Grotesk', Arial, sans-serif; font-weight: 700; font-size: 14px;}
+.mm-brand-name {font-family: 'Space Grotesk', Arial, sans-serif; font-weight: 700; font-size: 20px;}
+.mm-nav {display: flex; flex-wrap: wrap; gap: 4px; flex: 1 1 auto;}
+.mm-nav a, .mm-nav span {padding: 8px 12px; border-radius: 8px; font-size: 15px; font-weight: 500;
+  color: #4A5568 !important; text-decoration: none !important;}
+.mm-nav a:hover {background: #F5F6F8;}
+.mm-nav a[aria-current="page"] {font-weight: 600; color: #0F1E33 !important; background: #EAF1FC;}
+.mm-nav span.soon {color: #9AA3B2 !important; cursor: default;}
+.mm-nav span.soon small {font-size: 11px; margin-left: 4px;}
+.mm-upto {font-size: 14px; color: #4A5568;}
+.mm-upto b {color: #0F1E33;}
+.mm-menu {display: none;}
+
+/* ---------- page intro ---------- */
+.mm-intro {display: flex; flex-direction: column; gap: 12px; max-width: 800px; padding-top: 48px;}
+.mm-eyebrow {font-size: 13px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #B4561A;}
+.mm-eyebrow .phone-only {display: none;}
+.mm-intro h1 {margin: 0; padding: 0; font-size: 48px; line-height: 1.08; font-weight: 700; color: #0F1E33;}
+.mm-lead {font-size: 18px; line-height: 1.55; color: #4A5568;}
+
+/* ---------- section headings ---------- */
+.mm-sechead {display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; margin-top: 8px;}
+.mm-sechead h2 {margin: 0; padding: 0; font-size: 28px; font-weight: 700; color: #0F1E33;}
+.mm-sechead p {font-size: 14px; color: #4A5568;}
+
+/* ---------- navy hero ---------- */
+.mm-hero {background: #0F1E33; color: #FFFFFF; border-radius: 20px; padding: 36px; display: flex;
+  flex-wrap: wrap; gap: 24px 40px; align-items: center;}
+.mm-hero .main {flex: 3 1 420px; display: flex; flex-direction: column; gap: 14px;}
+.mm-hero .side {flex: 2 1 260px; display: flex; flex-direction: column; gap: 8px;
+  border-top: 1px solid #2B3B55; padding-top: 20px;}
+.mm-hero .soft {color: #B8C6DA; font-size: 16px;}
+.mm-hero .soft b {color: #FFFFFF;}
+.mm-hero .side p {font-size: 15px; line-height: 1.55; color: #D7DFEA;}
+.mm-hero .side b {color: #FFFFFF;}
+.mm-hero .figs {display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px 20px;}
+.mm-hero .fig {display: flex; flex-direction: column; gap: 2px;}
+.mm-hero .fig .lbl {font-size: 13px; color: #B8C6DA;}
+.mm-hero .fig .num {font-size: 44px; font-weight: 700; color: #FFFFFF; line-height: 1.1;}
+.mm-hero .fig .num.warm {color: #F0A65E;}
+.mm-hero .arrow {font-size: 32px; color: #F0A65E;}
+.mm-hero .kicker {font-size: 13px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #F0A65E;}
+.mm-hero .statement {font-family: 'Space Grotesk', Arial, sans-serif; font-size: 28px; line-height: 1.3; font-weight: 500; color: #FFFFFF;}
+.mm-hero .statement .warm {color: #F0A65E; font-weight: 700;}
+.mm-cta {flex: 0 0 auto; display: inline-flex; align-items: center; gap: 10px; height: 52px; padding: 0 22px;
+  border-radius: 12px; background: #F0A65E; color: #0F1E33 !important; font-weight: 700; font-size: 16px;
+  text-decoration: none !important;}
+.mm-cta:hover {background: #F4B97A;}
+
+/* ---------- badges ---------- */
+.mm-pill {display: inline-flex; align-self: flex-start; align-items: center; gap: 6px; padding: 6px 12px;
+  border-radius: 999px; font-size: 15px; font-weight: 700;}
+.mm-pill.sm {padding: 3px 9px; font-size: 13px;}
+.mm-pill.xs {padding: 2px 8px; font-size: 12px;}
+.mm-pill.bad {background: #FDECEA; color: #9B1C1C;}
+.mm-pill.good {background: #E3F4EA; color: #1D6B44;}
+.mm-pill.flat {background: #EEF0F3; color: #0F1E33;}
+
+/* ---------- cards ---------- */
+.mm-cards {display: flex; flex-wrap: wrap; gap: 16px;}
+.mm-card {flex: 1 1 190px; background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 14px; padding: 20px;
+  display: flex; flex-direction: column; gap: 10px; box-sizing: border-box;}
+.mm-card.lead {border: 2px solid #0F1E33; padding: 19px;}
+.mm-card .top {display: flex; justify-content: space-between; align-items: center; gap: 8px;}
+.mm-card .rank {font-size: 13px; font-weight: 700; color: #2A6FDB;}
+.mm-card h3 {margin: 0; padding: 0; font-family: Inter, Arial, sans-serif; font-size: 17px; font-weight: 700; color: #0F1E33;}
+.mm-card .num {font-size: 26px; font-weight: 700; color: #0F1E33;}
+.mm-card .sub {font-size: 13px; color: #4A5568; line-height: 1.5;}
+.mm-kpi {flex: 1 1 240px; padding: 22px; gap: 8px;}
+.mm-kpi h3 {font-size: 14px; font-weight: 600; color: #4A5568;}
+.mm-kpi .num {font-size: 34px;}
+.mm-kpi .chg {font-size: 14px; color: #4A5568;}
+.mm-kpi .chg b {font-weight: 700;}
+.mm-tip {display: inline-block; margin-left: 4px; color: #8A94A6; cursor: help; font-weight: 400;}
+.mm-explore {flex: 1 1 240px; border-top: 4px solid #2A6FDB; padding: 22px; gap: 8px;
+  text-decoration: none !important; color: #0F1E33 !important;}
+.mm-explore.warm {border-top-color: #D9822B;}
+.mm-explore .t {font-size: 18px; font-weight: 700;}
+.mm-explore .d {font-size: 14px; line-height: 1.5; color: #4A5568;}
+.mm-explore .soon {font-size: 12px; font-weight: 600; color: #8A94A6; text-transform: uppercase; letter-spacing: 1px;}
+a.mm-explore:hover {border-color: #CBD2DC; box-shadow: 0 2px 10px rgba(15,30,51,0.06);}
+
+/* ---------- ranked list (phones) ---------- */
+.mm-list {display: none; background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 14px; flex-direction: column;}
+.mm-list .row {display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid #EEF0F3;}
+.mm-list .row:last-child {border-bottom: none;}
+.mm-list .row.lead {background: #F5F8FD;}
+.mm-list .rank {width: 22px; font-size: 13px; font-weight: 700; color: #2A6FDB;}
+.mm-list .name {flex: 1 1 auto; display: flex; flex-direction: column; gap: 2px;}
+.mm-list .name b {font-size: 15px; font-weight: 600;}
+.mm-list .name span {font-size: 12px; color: #4A5568;}
+.mm-list .val {display: flex; flex-direction: column; align-items: flex-end; gap: 4px;}
+.mm-list .val b {font-size: 16px; font-weight: 700;}
+
+/* ---------- "What this means" ---------- */
+.mm-means {background: #FDF3E8; border-radius: 16px; padding: 24px 28px; display: flex; flex-direction: column; gap: 8px;}
+.mm-means h2 {margin: 0; padding: 0; font-size: 20px; font-weight: 700; color: #0F1E33;}
+.mm-means p {font-size: 16px; line-height: 1.6; color: #2D3A4F;}
+
+/* ---------- white panels made from st.container(key=...) ---------- */
+.st-key-panel-inputs, .st-key-panel-chart {background: #FFFFFF; border: 1px solid #E3E6EB !important;
+  border-radius: 16px; padding: 28px;}
+.st-key-panel-chart h2 {font-family: 'Space Grotesk', Arial, sans-serif; font-size: 22px; font-weight: 700; margin: 0; padding: 0;}
+.mm-legend {display: flex; flex-wrap: wrap; gap: 10px 22px; font-size: 14px; margin: 0; padding: 0; list-style: none;}
+.mm-legend li {display: flex; align-items: center; gap: 8px; margin: 0;}
+.mm-legend .sw {width: 18px; height: 4px; border-radius: 2px;}
+.mm-legend .sw.dot {height: 0; border-top: 4px dotted #8A94A6; background: none !important;}
+
+/* ---------- inputs ---------- */
+[data-testid="stWidgetLabel"] p {font-size: 14px !important; font-weight: 600 !important; color: #0F1E33;}
+.st-key-panel-inputs [data-testid="stTextInputRootElement"],
+.st-key-panel-inputs .react-aria-ComboBox > [role="group"] {
+  height: 52px; border: 1.5px solid #CBD2DC !important; border-radius: 10px !important; background: #FFFFFF;
+  box-sizing: border-box; align-items: center;}
+.st-key-panel-inputs .react-aria-ComboBox input {font-size: 16px !important; color: #0F1E33;}
+/* the ₦ prefix inside the amount box */
+.st-key-amount [data-testid="stTextInputRootElement"] {display: flex; align-items: center;}
+.st-key-amount [data-testid="stTextInputRootElement"]::before {content: "₦"; font-size: 20px; font-weight: 600;
+  color: #4A5568; padding-left: 16px; flex: 0 0 auto;}
+.st-key-amount input {font-size: 20px !important; font-weight: 600 !important; color: #0F1E33; padding-left: 8px !important;}
+/* month + year stay side by side, even on phones */
+.st-key-dates [data-testid="stHorizontalBlock"] {flex-wrap: nowrap !important; gap: 10px;}
+.st-key-dates [data-testid="stColumn"] {min-width: 0 !important;}
+.mm-hint {font-weight: 400; color: #4A5568;}
+
+/* pills: unselected white with grey border; selected navy with a tick (the "kept" choices) */
+[data-testid="stButtonGroup"] button[data-variant="pills"] {border-radius: 999px !important; height: 40px;
+  padding: 0 16px; background: #FFFFFF !important; border: 1px solid #CBD2DC !important;}
+[data-testid="stButtonGroup"] button[data-variant="pills"] p {font-size: 14px; color: #0F1E33 !important;}
+.st-key-kept button[data-selected="true"] {background: #0F1E33 !important; border-color: #0F1E33 !important;}
+.st-key-kept button[data-selected="true"] p {color: #FFFFFF !important; font-weight: 600;}
+.st-key-kept button[data-selected="true"] p::before {content: "✓ ";}
+.st-key-quick button[data-variant="pills"] {height: 36px; padding: 0 14px;}
+.st-key-quick button[aria-checked="true"] {background: #EAF1FC !important; border-color: #2A6FDB !important;}
+.st-key-quick button[aria-checked="true"] p {color: #1B4FA8 !important; font-weight: 600;}
+
+/* expanders as white cards */
+[data-testid="stExpander"] details {background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 12px;}
+[data-testid="stExpander"] summary p {font-size: 15px; font-weight: 600;}
+
+/* ---------- footer (full width) ---------- */
+.mm-footer {border-top: 1px solid #E3E6EB; background: #FFFFFF; margin: 32px calc(50% - 50vw) 0;}
+.mm-footer-in {max-width: 1120px; margin: 0 auto; padding: 24px; display: flex; flex-wrap: wrap;
+  justify-content: space-between; gap: 12px; font-size: 13px; color: #4A5568; box-sizing: border-box;}
+.mm-footer-in p {font-size: 13px; color: #4A5568; line-height: 1.6;}
+
+/* ---------- phones ---------- */
+@media (max-width: 640px) {
+  [data-testid="stMainBlockContainer"], .block-container {padding: 0 16px;}
+  .mm-header-in {padding: 12px 16px; justify-content: space-between;}
+  .mm-badge234 {height: 30px; padding: 0 8px; font-size: 13px;}
+  .mm-brand-name {font-size: 18px;}
+  .mm-header .mm-nav, .mm-upto {display: none;}
+  .mm-menu {display: block; position: relative;}
+  .mm-menu summary {list-style: none; width: 44px; height: 44px; border: 1px solid #E3E6EB; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; cursor: pointer; background: #FFFFFF;}
+  .mm-menu summary::-webkit-details-marker {display: none;}
+  .mm-burger {font-size: 22px; line-height: 1; color: #0F1E33;}
+  .mm-menu .mm-nav {display: flex; flex-direction: column; position: absolute; right: 0; top: 52px; z-index: 1000;
+    background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 12px; padding: 8px; min-width: 200px;
+    box-shadow: 0 8px 24px rgba(15,30,51,0.12);}
+  .mm-intro {padding-top: 24px; gap: 8px;}
+  .mm-eyebrow {font-size: 12px; letter-spacing: 1.4px;}
+  .mm-eyebrow .phone-only {display: inline;}
+  .mm-intro h1 {font-size: 32px; line-height: 1.1;}
+  .mm-lead {font-size: 16px;}
+  .mm-sechead h2 {font-size: 22px;}
+  .mm-hero {padding: 22px; border-radius: 16px; gap: 14px;}
+  .mm-hero .main {flex-basis: 100%; gap: 14px;}
+  .mm-hero .side {flex-basis: 100%; padding-top: 12px;}
+  .mm-hero .soft {font-size: 14px;}
+  .mm-hero .figs {flex-direction: column; align-items: flex-start; gap: 14px;}
+  .mm-hero .arrow {display: none;}
+  .mm-hero .fig .lbl {font-size: 12px;}
+  .mm-hero .fig .num {font-size: 34px;}
+  .mm-hero .statement {font-size: 21px;}
+  .mm-hero .side p {font-size: 14px;}
+  .mm-pill {font-size: 14px; padding: 5px 11px;}
+  .mm-cards.rank-cards {display: none;}
+  .mm-list {display: flex;}
+  .mm-kpi .num {font-size: 28px;}
+  .st-key-panel-inputs, .st-key-panel-chart {padding: 18px; border-radius: 14px;}
+  .st-key-panel-chart h2 {font-size: 18px;}
+  .mm-means {padding: 18px; border-radius: 14px;}
+  .mm-means h2 {font-size: 18px;}
+  .mm-means p {font-size: 15px;}
+  [data-testid="stButtonGroup"] button[data-variant="pills"] {height: 38px; padding: 0 12px;}
+  [data-testid="stButtonGroup"] button[data-variant="pills"] p {font-size: 13px;}
+  .st-key-panel-inputs [data-testid="stTextInputRootElement"] {height: 50px;}
+  .st-key-panel-inputs .react-aria-ComboBox > [role="group"] {height: 48px;}
+  .mm-footer {margin-top: 24px;}
+  .mm-footer-in {padding: 16px; flex-direction: column; gap: 4px;}
+  .mm-footer-in p {font-size: 12px;}
+}
+</style>
+"""
 
 
-def pct_delta(x, decimals=1):
-    """A % change for st.metric deltas (plain hyphen for minus, see points)."""
-    return None if pd.isna(x) else f"{x:+.{decimals}f}%"
+def inject_css():
+    st.html(CSS)
 
 
 # --------------------------------------------------------------------------- page pieces
-def base_css():
-    st.markdown(
-        """
-        <style>
-        .block-container {padding-top: 2rem; padding-bottom: 2rem;}
-        [data-testid="stMetricValue"] {font-size: 1.6rem;}
-        [data-testid="stMetricLabel"] p {font-size: 0.9rem;}
-        .mm-sentence {font-size: 1.15rem; line-height: 1.6; color: #0F1E33;}
-        .mm-big {font-size: 1.5rem; font-weight: 700; color: #0F1E33; margin: 0;}
-        .mm-small {color: #4A5568; font-size: 0.9rem; margin: 0;}
-        @media (max-width: 640px) {
-            .block-container {padding-left: 1rem; padding-right: 1rem;}
-            h1 {font-size: 1.8rem !important;}
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
+def brand_header(active, meta):
+    """The white top bar: +234 badge and name, page tabs, 'Data up to' on the right.
+
+    On phones the tabs fold into a menu button (pure HTML <details>, no JavaScript).
+    """
+    links = []
+    for name, url in NAV:
+        if url is None:
+            links.append(f'<span class="soon" title="Coming soon">{e(name)}<small>soon</small></span>')
+        elif name == active:
+            links.append(f'<a href="{url}" aria-current="page">{e(name)}</a>')
+        else:
+            links.append(f'<a href="{url}">{e(name)}</a>')
+    nav = "".join(links)
+    menu_icon = '<span class="mm-burger" aria-hidden="true">☰</span>'  # st.html strips inline SVG
+    st.html(
+        f'<header class="mm mm-header"><div class="mm-header-in">'
+        f'<a class="mm-brand" href="/" aria-label="{e(APP_NAME)}, home">'
+        f'<span class="mm-badge234">+234</span><span class="mm-brand-name">Money Matters</span></a>'
+        f'<nav class="mm-nav" aria-label="Main">{nav}</nav>'
+        f'<p class="mm-upto">Data up to <b>{e(meta["latest_month_label"])}</b></p>'
+        f'<details class="mm-menu"><summary aria-label="Open menu">{menu_icon}</summary>'
+        f'<nav class="mm-nav" aria-label="Main (phone)">{nav}</nav></details>'
+        f'</div></header>'
     )
 
 
-def data_up_to(meta):
-    st.caption(f"📅 Data up to **{meta['latest_month_label']}** · Central Bank of Nigeria")
+def page_intro(eyebrow, title, lead, meta):
+    """Orange eyebrow, big Space Grotesk title, grey lead. On phones the eyebrow adds 'Data up to'."""
+    short = pd.Timestamp(meta["latest_month"]).strftime("%b %Y")
+    lead_html = f'<p class="mm-lead">{lead}</p>' if lead else ""
+    st.html(
+        f'<section class="mm mm-intro"><p class="mm-eyebrow">{e(eyebrow)}'
+        f'<span class="phone-only"> · Data up to {short}</span></p>'
+        f'<h1>{e(title)}</h1>{lead_html}</section>'
+    )
+
+
+def section_head(title, note=""):
+    st.html(f'<div class="mm mm-sechead"><h2>{e(title)}</h2><p>{e(note)}</p></div>')
+
+
+def change_badge(change_pct, size="", short=False):
+    """A real-terms change in colour AND words: 'Lost 15.9% of its value' / 'Gained 3.2%'.
+
+    short=True gives 'Lost 15.9%' for tight spaces.
+    """
+    if pd.isna(change_pct):
+        return ""
+    if abs(change_pct) < 0.05:
+        return f'<span class="mm-pill flat {size}">Kept its value</span>'
+    if change_pct < 0:
+        words = f"Lost {abs(change_pct):.1f}%" + ("" if short else " of its value")
+        return f'<span class="mm-pill bad {size}">{words}</span>'
+    words = f"Gained {change_pct:.1f}%" + ("" if short else " in value")
+    return f'<span class="mm-pill good {size}">{words}</span>'
+
+
+def info_box(title, text_html):
+    """The warm 'What this means' box."""
+    st.html(f'<section class="mm mm-means"><h2>{e(title)}</h2><p>{text_html}</p></section>')
 
 
 def footer():
-    st.divider()
-    st.caption(
-        "Educational, not financial advice. Data: Central Bank of Nigeria (and US BLS via FRED for the "
-        "naira page). Built by Freedom Oboh with Python and Streamlit."
+    articles = " · ".join(f'<a href="{url}" target="_blank" rel="noopener">{e(n)}</a>' for n, url in ARTICLES.items())
+    linkedin = f' · <a href="{LINKEDIN_URL}" target="_blank" rel="noopener">LinkedIn</a>' if LINKEDIN_URL else ""
+    st.html(
+        f'<footer class="mm mm-footer"><div class="mm-footer-in">'
+        f'<p>Educational, not financial advice. Data: Central Bank of Nigeria (and US BLS via FRED for the naira page).</p>'
+        f'<p>Built by Freedom Oboh with Python and Streamlit · '
+        f'<a href="{GITHUB_URL}" target="_blank" rel="noopener">GitHub</a>{linkedin} · Articles: {articles}</p>'
+        f'</div></footer>'
     )
-    article_links = " · ".join(f"[{name}]({url})" for name, url in ARTICLES.items())
-    st.caption(f"[GitHub]({GITHUB_URL}) · Articles on LinkedIn: {article_links}")
 
 
-def under_the_hood(meta, keys, extra_md=None):
-    with st.expander("Under the hood: how these numbers are made"):
+def under_the_hood(meta, keys, extra_md=None, title="Under the hood: how these numbers are made"):
+    with st.expander(title):
         if extra_md:
             st.markdown(extra_md)
         for key in keys:
@@ -146,19 +414,22 @@ def under_the_hood(meta, keys, extra_md=None):
 
 
 # --------------------------------------------------------------------------- charts
-def style_figure(fig, y_title="", height=420):
+def style_figure(fig, height=320):
     fig.update_layout(
         template="plotly_white",
         height=height,
-        margin=dict(l=8, r=8, t=40, b=8),
-        font=dict(color=NAVY, size=13),
-        legend=dict(orientation="h", yanchor="bottom", y=1.0, xanchor="left", x=0, title=None),
+        margin=dict(l=4, r=8, t=8, b=4),
+        font=dict(family="Inter, Arial, sans-serif", color=NAVY, size=13),
+        showlegend=False,
         hovermode="x unified",
-        yaxis_title=y_title,
+        hoverlabel=dict(font=dict(family="Inter, Arial, sans-serif")),
+        paper_bgcolor="#FFFFFF",
+        plot_bgcolor="#FFFFFF",
         xaxis_title=None,
+        yaxis_title=None,
     )
-    fig.update_xaxes(showgrid=False, linecolor=GRID)
-    fig.update_yaxes(gridcolor=GRID, zeroline=False)
+    fig.update_xaxes(showgrid=False, linecolor="#E3E6EB", tickfont=dict(color=MUTED, size=12))
+    fig.update_yaxes(gridcolor=GRID, zeroline=False, tickfont=dict(color=MUTED, size=12))
     return fig
 
 
@@ -166,5 +437,10 @@ def show_chart(fig):
     st.plotly_chart(fig, width="stretch", config={"displayModeBar": False, "responsive": True})
 
 
-def empty_figure():
-    return go.Figure()
+def legend(items):
+    """items: list of (name, colour, dotted)."""
+    lis = "".join(
+        f'<li><span class="sw{" dot" if dotted else ""}" style="background:{c}"></span>{e(n)}</li>'
+        for n, c, dotted in items
+    )
+    st.html(f'<ul class="mm mm-legend">{lis}</ul>')
