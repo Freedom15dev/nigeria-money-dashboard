@@ -5,3 +5,6 @@ __pycache__/
 *.tmp
 # The exchange-rate feed is ~9 MB and changes every day; the manifest records each pull.
 data/raw/exchange_rates.json
+
+# Project brief for Claude: kept locally, not published
+CLAUDE.md
