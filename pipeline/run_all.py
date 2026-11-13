@@ -32,8 +32,16 @@ META_PATH = PROCESSED / "meta.json"
 PANEL_PATH = PROCESSED / "panel.csv"
 
 
+def annotate(message, level="error", title="Pipeline"):
+    """On GitHub Actions, also show the message as an annotation on the run's summary page."""
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        text = str(message).replace("%", "%25").replace("\r", "").replace("\n", "%0A")
+        print(f"::{level} title={title}::{text}", flush=True)
+
+
 def fail(message):
     print(f"\nFAILED: {message}\nThe data in data/processed/ was NOT changed.", file=sys.stderr)
+    annotate(f"{message} The data in data/processed/ was NOT changed.", title="Monthly update failed")
     sys.exit(1)
 
 
@@ -88,6 +96,7 @@ def main(offline=False):
     if errors:
         for e in errors:
             print(f"  ERROR {e}", file=sys.stderr)
+            annotate(e, title="Validation check failed")
         fail(f"{len(errors)} validation check(s) failed.")
     print("  All checks passed.")
 
