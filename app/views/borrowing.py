@@ -78,8 +78,13 @@ cards.append(kpi_card(
     "households) gets the rest."))
 section_head("The key numbers", f"{latest:%B %Y}, compared with {year_ago:%B %Y}")
 st.html(f'<div class="mm mm-cards">{"".join(cards)}</div>')
-if estimated:
-    st.caption(f"Estimated {year_ago:%B %Y}: {meta['trap_notes']['rate_spikes']}")
+RATE_NAMES = {"primeLending": "prime rate", "maxLending": "maximum lending rate", "savingsDeposit": "savings rate",
+              "treasuryBill": "Treasury bill rate", "policy_rate": "policy rate"}
+if estimated:  # one line per feed glitch behind an estimated card; the full explanation is under the hood
+    for s in meta.get("rate_spikes", []):
+        if s["month"] == f"{year_ago:%Y-%m}":
+            st.caption(f"{year_ago:%B %Y} {RATE_NAMES.get(s['column'], s['column'])} estimated: the CBN figure "
+                       f"({s['value']:.2f}%) was a one-month glitch.")
 
 # ----------------------------------------------------------------------------- period
 with st.container(key="panel-inputs"):

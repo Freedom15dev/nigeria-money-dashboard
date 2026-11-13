@@ -2,3 +2,4 @@ model,vintage,source,series,forecast_months,checked,inside80,above80,below80,che
 inflation,2026-09,published,food,12,0,0,0,0,0,0,,,,,,2026-10-01
 inflation,2026-09,published,headline,12,0,0,0,0,0,0,,,,,,2026-10-01
 naira,2026-09,published,outlook,3,0,0,0,0,0,0,,,,,,2027-09-01
+naira,2026-09-rerun,model re-run (not published),outlook,48,0,0,0,0,0,0,,,,,,2026-10-01

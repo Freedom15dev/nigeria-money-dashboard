@@ -62,7 +62,8 @@ st.html(
     f'<div class="fig"><span class="lbl">In January 2006</span><span class="num warm">{naira(since06.iloc[0], 2)}</span></div>'
     f'</div>{badge}</div>'
     f'<div class="side"><p>Since January 2006 the naira has lost <b>{lost_since_06:.0f}%</b> of its value against the dollar.</p>'
-    f'<p>Just <b>{int(is_jump.sum())} jump months</b> (a fall of more than 5% in one month) account for about '
+    f'<p>Just <b>{int(is_jump.sum())} jump months since {since06.index[0]:%B %Y}</b> (a fall of more than 5% in one '
+    f'month) account for about '
     f'<b>{jump_share * 100:.0f}%</b> of that fall. The rest of the time it barely moved.</p></div></section>'
 )
 
@@ -98,7 +99,8 @@ with st.container(key="panel-history"):
         fig.update_yaxes(tickprefix="₦", tickformat=",.0f", rangemode="tozero")
     style_figure(fig, height=340)
     show_chart(fig)
-    legend([("Official rate (monthly average)", BLUE, False), (f"Jump month ({len(jumps)} shown)", ORANGE, False)])
+    legend([("Official rate (monthly average)", BLUE, False),
+            (f"{len(jumps)} jump months since {view.index.min():%B %Y}", ORANGE, False)])
 
 # ----------------------------------------------------------------------------- outlook
 section_head(f"Where could the naira be by {KEY_MONTHS[-1]:%Y}?", "A range, not a prediction")
@@ -187,7 +189,7 @@ with st.container(key="panel-scenarios"):
 
 # ----------------------------------------------------------------------------- forecast tracker
 section_head("How are the forecasts doing?", "Old forecasts are kept exactly as made")
-forecast_tracker("naira", "outlook", fx, "naira", NAVY, "track-naira", history_months=24)
+forecast_tracker("naira", "outlook", fx, "naira", NAVY, "track-naira", history_months=24, prefer_rerun=True)
 
 # ----------------------------------------------------------------------------- what this means
 k_last = by_month.loc[KEY_MONTHS[-1]]
@@ -196,7 +198,7 @@ calmest = end["high80"].idxmin()
 info_box("What this means", e(
     f"The naira is {abs(yoy):.1f}% {'stronger' if yoy < 0 else 'weaker'} than a year ago, but over 20 years it has "
     f"lost {lost_since_06:.0f}% of its value against the dollar, and almost all of that came in {int(is_jump.sum())} "
-    f"sudden jump months rather than a steady slide. Nobody can say when the next jump comes, so the outlook is a "
+    f"sudden jump months since {since06.index[0]:%B %Y} rather than a steady slide. Nobody can say when the next jump comes, so the outlook is a "
     f"range: by {KEY_MONTHS[-1]:%B %Y}, a 4 in 5 chance of between {ten(k_last['low80'])} and {ten(k_last['high80'])} "
     f"per dollar. It leans upward because the naira's history is mostly falls; the bottom allows it to strengthen as "
     f"much as it has since the 2023 float. Of the four stories, '{calmest}' gives the lowest top "

@@ -235,7 +235,8 @@ def fix_one_month_spikes(mm):
         df.loc[hit, col] = np.nan
     described = [f"{c} {m:%Y-%m} ({a:.2f} -> {v:.2f} -> {b:.2f})" for c, m, a, v, b in caught]
     line = f"One-month spikes treated as missing: {described if described else 'none'}."
-    return df, line, [(c, f"{m:%Y-%m}") for c, m, *_ in caught]
+    return df, line, [{"column": c, "month": f"{m:%Y-%m}", "value": round(float(v), 4), "before": round(float(a), 4),
+                      "after": round(float(b), 4)} for c, m, a, v, b in caught]
 
 
 def add_rate_chart_columns(df):

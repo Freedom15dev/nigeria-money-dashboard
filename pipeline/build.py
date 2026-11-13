@@ -119,7 +119,8 @@ def build_panel(raw):
         panel["creditToGovernment_chart"] > 0)
 
     # Gaps made on purpose by the fixes, so validate.py accepts exactly these and nothing else.
-    panel.attrs["fixed_gaps"] = set(spike_gaps)
+    panel.attrs["fixed_gaps"] = {(s["column"], s["month"]) for s in spike_gaps}
+    panel.attrs["rate_spikes"] = spike_gaps  # each glitch with its published value, for the app's notes
     return panel, log, latest
 
 

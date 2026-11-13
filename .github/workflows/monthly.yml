@@ -1,19 +1,21 @@
-# Monthly data update for (+234) Money Matters (CLAUDE.md §4.5).
+# Data update for (+234) Money Matters (CLAUDE.md §4.5).
 #
-# Around the 10th of each month (and whenever started by hand from the Actions tab) this:
+# The CBN publishes each month's figures on no fixed day, so this checks EVERY MONDAY (and whenever
+# started by hand from the Actions tab). Each run:
 #   1. installs the requirements
 #   2. runs the self-checks, then python pipeline/run_all.py (fetch -> clean -> build -> models -> validate)
 #   3. checks the app still renders with the new data
-#   4. if data/processed/ changed, commits it ("Monthly data update: data up to <month>") and pushes;
+#   4. if the data changed, commits data/processed/ ("Monthly data update: data up to <month>") and pushes;
 #      Streamlit Cloud redeploys on the push.
-# If nothing changed it stops quietly. If anything fails the run turns red, nothing is committed,
-# and the app keeps the old data.
+# run_all.py only writes when the data itself changed (a new month, a CBN revision, or a new forecast
+# vintage), so most weeks end quietly with "No new data", and no commit. If anything fails the run turns
+# red, nothing is committed, and the app keeps the old data.
 
-name: Monthly data update
+name: Monthly data update (checked weekly)
 
 on:
   schedule:
-    - cron: "17 6 10 * *"   # 06:17 UTC on the 10th of every month
+    - cron: "17 6 * * 1"    # 06:17 UTC (07:17 in Lagos) every Monday
   workflow_dispatch:         # "Run workflow" button in the Actions tab
 
 permissions:

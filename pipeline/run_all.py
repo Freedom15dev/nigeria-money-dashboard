@@ -114,6 +114,7 @@ def main(offline=False, rebuild=False):
         "run_log": log + vlog,
         "trap_notes": clean.TRAP_NOTES,
         "models": {"inflation": forecast_notes, "naira": naira_notes},
+        "rate_spikes": panel.attrs.get("rate_spikes", []),
     }
 
     def csv(df):

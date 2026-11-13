@@ -159,7 +159,22 @@ def main():
     print("ok  Prices tracker shows the earliest vintage's scorecard")
     text = everything(run("views/naira.py"))
     assert "How are the forecasts doing?" in text and "never redrawn" in text
-    print("ok  Naira tracker renders")
+    rerun = CARDS[(CARDS["model"] == "naira") & (CARDS["source"] == "model re-run (not published)")]
+    if len(rerun):  # the page opens on the re-run of the published model, clearly labelled
+        assert "This is a re-run of the published model, not the published forecast itself." in text
+        r = rerun.iloc[0]
+        if r["checked"] == 0:
+            assert f"<b>{r['next_check']:%B %Y}</b>" in text, "re-run's first check not on screen"
+    assert "jump months since January 2006" in text and "jump months since January 2003" in text
+    print("ok  Naira tracker opens on the labelled re-run; jump-month counts name their periods")
+
+    for s in META.get("rate_spikes", []):  # Borrowing: one line per glitch behind a card, not the full note
+        if s["month"] == f"{LATEST - pd.DateOffset(years=1):%Y-%m}" and s["column"] == "primeLending":
+            text = everything(run("views/borrowing.py"))
+            line = f"prime rate estimated: the CBN figure ({s['value']:.2f}%) was a one-month glitch."
+            assert line in text, line
+            assert "Our rule: a month more than 5 points" not in " ".join(c.value for c in run("views/borrowing.py").caption)
+            print(f"ok  Borrowing shows the one-line glitch note: '... {line}'")
     print("All app smoke tests passed.")
 
 

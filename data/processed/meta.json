@@ -1,7 +1,7 @@
 {
   "latest_month": "2026-09-01",
   "latest_month_label": "September 2026",
-  "built_at_utc": "2026-11-13T15:58:16+00:00",
+  "built_at_utc": "2026-11-13T16:12:39+00:00",
   "pulled_at_utc": {
     "inflation": "2026-11-13T15:58:06+00:00",
     "money_market": "2026-11-13T15:58:06+00:00",
@@ -45,7 +45,7 @@
     "Known difference from credit-squeeze: neg_prime published 72, now 71 (the prime rate's Sep 2025 glitch (11.90%) is treated as missing here; credit-squeeze counted it as a month with a negative real prime rate).",
     "Credit article reproduced: 14 of 15 published numbers match exactly, 1 known difference listed.",
     "Models reproduce the articles on data to Sep 2026: all 43 published numbers match (inflation to 0.1 point, naira to the nearest ₦10).",
-    "Forecast vintages: all 2 saved files unchanged.",
+    "Forecast vintages: all 3 saved files unchanged.",
     "Vintage inflation_2026-09.csv already saved (published); left unchanged.",
     "Vintage naira_2026-09.csv already saved (published); left unchanged."
   ],
@@ -122,5 +122,14 @@
         }
       }
     }
-  }
+  },
+  "rate_spikes": [
+    {
+      "column": "primeLending",
+      "month": "2025-09",
+      "value": 11.9,
+      "before": 18.88,
+      "after": 18.89
+    }
+  ]
 }

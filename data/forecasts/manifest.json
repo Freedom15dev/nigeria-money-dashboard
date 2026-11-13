@@ -10,5 +10,11 @@
     "note": "naira-scenarios, notebook sections 9c and 9e (as published)",
     "sha256": "ac501658cab48e1f995db4d59037f89586c85c08d52b8a3028b8026f74502646",
     "saved_at_utc": "2026-11-13T13:26:15+00:00"
+  },
+  "naira_2026-09-rerun.csv": {
+    "source": "model re-run (not published)",
+    "note": "models.naira_outlook re-run on data to Sep 2026 (seed 42); reproduces the published ranges and adds every month to Sep 2030",
+    "sha256": "82db35d0b07eb2aa3ba86f733f881ad541c3880d5801a01a6723232bdf5e6092",
+    "saved_at_utc": "2026-11-13T16:10:38+00:00"
   }
 }

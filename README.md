@@ -28,7 +28,14 @@ streamlit run app/Home.py       # open the app at http://localhost:8501
 ```
 
 `python pipeline/run_all.py --offline` rebuilds from the raw files already saved, without downloading.
-If the data hasn't changed, nothing is written (so a quiet month makes no commit); add `--rebuild` to write every
+If the data hasn't changed, nothing is written (so a quiet week makes no commit); add `--rebuild` to write every
 output anyway, e.g. after changing the code.
+
+## How it stays current
+
+A GitHub Action (`.github/workflows/monthly.yml`) checks for new CBN figures **every Monday** at 07:17 Lagos
+time, and can be started by hand from the repo's **Actions** tab. It runs every check first; only if the data
+has changed does it commit the new figures ("Monthly data update: data up to …"), and Streamlit Cloud redeploys.
+If any check fails, the run turns red and the app keeps the old data.
 
 Educational, not financial advice. Data: Central Bank of Nigeria. Built by Freedom Oboh with Python and Streamlit.

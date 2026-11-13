@@ -36,7 +36,7 @@ def score(vintages, actuals, model, central, unit):
         series_actual = actuals.get(v["series"])
         if series_actual is None or v["month"] not in series_actual.index or pd.isna(series_actual[v["month"]]):
             continue
-        made = pd.Timestamp(f"{v['vintage']}-01")
+        made = pd.Timestamp(f"{str(v['vintage'])[:7]}-01")  # e.g. '2026-09' or '2026-09-rerun'
         actual = series_actual[v["month"]]
         naive = series_actual.get(made, np.nan)
         rows.append({

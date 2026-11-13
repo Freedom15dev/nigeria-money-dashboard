@@ -537,17 +537,24 @@ def legend(items):
 
 
 # --------------------------------------------------------------------------- forecast tracker
+RERUN = "model re-run (not published)"
+
+
 def _vintage_label(vintage, source):
-    month = pd.Timestamp(f"{vintage}-01")
-    return f"{month:%b %Y}" + (" (as published)" if source == "published" else "")
+    month = pd.Timestamp(f"{vintage[:7]}-01")
+    if source == "published":
+        return f"{month:%b %Y} (as published)"
+    if source == RERUN:
+        return f"{month:%b %Y} (re-run of the published model)"
+    return f"{month:%b %Y}"
 
 
-def forecast_tracker(model, series, actual, unit, colour, key, history_months=12):
+def forecast_tracker(model, series, actual, unit, colour, key, history_months=12, prefer_rerun=False):
     """'How are the forecasts doing?': each saved forecast, frozen exactly as made, with the actual
     line drawn over it, a plain-words scorecard and every checked month (hits and misses alike).
 
     model 'inflation' or 'naira'; series 'headline'/'food'/'outlook'; actual: pd.Series by month;
-    unit 'points' or 'naira'.
+    unit 'points' or 'naira'. prefer_rerun: open on the re-run of the published model, if there is one.
     """
     import plotly.graph_objects as go
 
@@ -563,14 +570,18 @@ def forecast_tracker(model, series, actual, unit, colour, key, history_months=12
 
     vint["vintage"] = vint["vintage"].astype(str)
     cards = cards.assign(vintage=cards["vintage"].astype(str))
-    options = {_vintage_label(v, s): v for v, s in vint.groupby("vintage")["source"].first().items()}
+    sources = vint.groupby("vintage")["source"].first()
+    options = {_vintage_label(v, s): v for v, s in sources.items()}
     labels = list(options)
-    picked = st.pills("Forecast made with data up to", labels, default=labels[0], key=f"{key}_vintage") or labels[0]
+    reruns = [lab for lab, v in options.items() if sources[v] == RERUN]
+    default = reruns[0] if prefer_rerun and reruns else labels[0]
+    picked = st.pills("Forecast made with data up to", labels, default=default, key=f"{key}_vintage") or default
     vintage = options[picked]
+    source = sources[vintage]
     v = vint[vint["vintage"] == vintage].sort_values("month")
     card = cards[cards["vintage"] == vintage].iloc[0]
     sc = scores[scores["vintage"].astype(str) == vintage].sort_values("month") if len(scores) else scores
-    made = pd.Timestamp(f"{vintage}-01")
+    made = pd.Timestamp(f"{vintage[:7]}-01")  # e.g. "2026-09" or "2026-09-rerun"
     fmt = (lambda x: f"{x:.1f}%") if unit == "points" else (lambda x: naira(x))
 
     # ---- scorecard in words
@@ -605,9 +616,16 @@ def forecast_tracker(model, series, actual, unit, colour, key, history_months=12
                       "should still miss about 1 month in 5, so it needs a year or more of checks.")
         if pd.notna(card["next_check"]):
             words += f" Next check: {pd.Timestamp(card['next_check']):%B %Y}."
+    if source == RERUN:
+        about = (f"<b>This is a re-run of the published model, not the published forecast itself.</b> Same model, "
+                 f"same data (to {made:%B %Y}) and same random seed, run again after publication to keep every month "
+                 f"to {v['month'].max():%B %Y}; at the dates the article printed it gives the published ranges. "
+                 f"The published version is kept too, unchanged. Both are frozen and never redrawn or edited.")
+    else:
+        about = (f"The forecast is shown exactly as it was saved with data to {made:%B %Y}; old forecasts are never "
+                 f"redrawn or edited.")
     st.html(f'<section class="mm mm-note" style="border-left-color:#2A6FDB"><h3>Scorecard</h3><p>{words}</p>'
-            f'<p style="color:#4A5568">The forecast is shown exactly as it was saved in {made:%B %Y}; '
-            f'old forecasts are never redrawn or edited.</p></section>')
+            f'<p style="color:#4A5568">{about}</p></section>')
 
     # ---- chart: the frozen forecast with the actual line over it
     with st.container(key=f"panel-{key}"):
