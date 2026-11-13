@@ -9,7 +9,7 @@ when each feed was pulled, how many records it had, and a fingerprint (SHA-256) 
 the file, so every month's run can be traced.
 
 If a feed fails, the script stops with an error. It never falls back to made-up data.
-(US CPI from FRED is added in Phase 2, for the naira page.)
+US consumer prices come from FRED (series CPIAUCSL), saved as data/raw/us_cpi.csv.
 
 Run from the project root:  python pipeline/fetch.py
 """
@@ -73,6 +73,35 @@ def raw_path(name):
     return RAW_DIR / f"{name}.json"
 
 
+# US consumer prices (FRED series CPIAUCSL), for the inflation gap behind the naira page's
+# "policy reversal" scenario. FRED answers the plain requests client quickly; a custom
+# User-Agent made it hang in testing, so none is sent.
+FRED_URL = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL"
+FRED_RAW = RAW_DIR / "us_cpi.csv"
+
+
+def fetch_us_cpi(attempts=3, wait_seconds=20):
+    for attempt in range(1, attempts + 1):
+        try:
+            response = requests.get(FRED_URL, timeout=120)
+            response.raise_for_status()
+            text = response.text
+            if not text.startswith("observation_date,CPIAUCSL"):
+                raise ValueError("FRED CPIAUCSL file has an unexpected format")
+            return text
+        except (requests.ConnectionError, requests.Timeout, requests.HTTPError):
+            if attempt == attempts:
+                raise
+        print(f"  FRED: no answer, trying again in {wait_seconds}s ({attempt}/{attempts})")
+        time.sleep(wait_seconds)
+
+
+def load_us_cpi_text():
+    if not FRED_RAW.exists():
+        raise FileNotFoundError("No US CPI file. Run python pipeline/fetch.py first.")
+    return FRED_RAW.read_text(encoding="utf-8")
+
+
 def fetch_all():
     """Download every feed, save it to data/raw/<name>.json, and update the manifest."""
     RAW_DIR.mkdir(parents=True, exist_ok=True)
@@ -89,6 +118,15 @@ def fetch_all():
             "sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
         }
         print(f"  {endpoint}: {len(records):,} records")
+    text = fetch_us_cpi()
+    FRED_RAW.write_text(text, encoding="utf-8", newline="\n")
+    manifest["us_cpi"] = {
+        "url": FRED_URL,
+        "pulled_at_utc": pulled_at,
+        "records": text.count("\n"),
+        "sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+    }
+    print(f"  FRED CPIAUCSL: {manifest['us_cpi']['records']:,} months")
     MANIFEST.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     return manifest
 

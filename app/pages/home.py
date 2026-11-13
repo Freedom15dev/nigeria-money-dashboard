@@ -4,7 +4,8 @@ import pandas as pd
 import streamlit as st
 
 from components import (BAD, DESCRIPTION, GOOD, HELP, LOAN_CALCULATOR_URL, NAVY, SUPPORTING_LINE, TAGLINE,
-                        brand_header, e, footer, load_meta, load_panel, naira, page_intro, pct, section_head)
+                        brand_header, change_text, e, footer, kpi_card, load_meta, load_panel, naira, page_intro,
+                        pct, section_head)
 
 panel = load_panel().set_index("month")
 meta = load_meta()
@@ -34,24 +35,7 @@ with st.container(key="hero-home", horizontal=True, vertical_alignment="center")
 
 
 # ----------------------------------------------------------------------------- key numbers
-def arrow(x):
-    return "↑" if x > 0 else "↓" if x < 0 else "→"
-
-
-def change(x, unit, good_when, words):
-    """Coloured change plus a plain-words note. good_when: 'up', 'down' or None (neutral)."""
-    if abs(x) < 0.005:
-        return f'<b style="color:{NAVY}">no change</b> · {e(words)}'
-    colour = NAVY if good_when is None else GOOD if (x > 0) == (good_when == "up") else BAD
-    amount = f"{abs(x):.2f} pts" if unit == "pts" else f"{abs(x):.1f}%"
-    return f'<b style="color:{colour}">{arrow(x)} {amount}</b> · {e(words)}'
-
-
-def kpi(title, value, change_html, help_text, value_colour=NAVY):
-    return (f'<article class="mm-card mm-kpi"><h3>{e(title)}<span class="mm-tip" title="{e(help_text)}" '
-            f'aria-label="{e(help_text)}">ⓘ</span></h3>'
-            f'<p class="num" style="color:{value_colour}">{value}</p><p class="chg">{change_html}</p></article>')
-
+change, kpi = change_text, kpi_card  # shared with the Prices page (components.py)
 
 estimated = []  # rates whose year-ago figure was a feed glitch (see clean.fix_one_month_spikes)
 
@@ -123,19 +107,20 @@ with st.expander("What these terms mean"):
 
 # ----------------------------------------------------------------------------- explore
 section_head("Explore")
+EXPLORE = [  # (key, title, description, page, link text)
+    ("savings", "My savings", "What is money you saved in a past year worth today?", "pages/savings.py",
+     "Work out my savings →"),
+    ("prices", "Prices", "Inflation since 2003, and where it may head next.", "pages/prices.py", "See prices →"),
+    ("naira", "The naira", "20 years of the dollar rate, and the outlook to 2030.", "pages/naira.py",
+     "See the naira →"),
+]
 with st.container(key="explore", horizontal=True):
-    with st.container(key="explore-savings"):
-        st.html('<div class="mm" style="display:flex;flex-direction:column;gap:8px">'
-                '<span style="font-size:18px;font-weight:700">My savings</span>'
-                '<span style="font-size:14px;line-height:1.5;color:#4A5568">What is money you saved in a past '
-                'year worth today?</span></div>')
-        st.page_link("pages/savings.py", label="Work out my savings →")
-    st.html('<div class="mm mm-card mm-explore"><span class="t">Prices</span>'
-            '<span class="d">Inflation since 2003, and where it may head next.</span>'
-            '<span class="soon">Coming soon</span></div>')
-    st.html('<div class="mm mm-card mm-explore"><span class="t">The naira</span>'
-            '<span class="d">20 years of the dollar rate, and the outlook to 2030.</span>'
-            '<span class="soon">Coming soon</span></div>')
+    for key, title, text, page, link in EXPLORE:
+        with st.container(key=f"explore-{key}"):
+            st.html(f'<div class="mm" style="display:flex;flex-direction:column;gap:8px">'
+                    f'<span style="font-size:18px;font-weight:700">{title}</span>'
+                    f'<span style="font-size:14px;line-height:1.5;color:#4A5568">{text}</span></div>')
+            st.page_link(page, label=link)
     st.html(f'<a class="mm mm-card mm-explore warm" href="{LOAN_CALCULATOR_URL}" target="_blank" rel="noopener">'
             '<span class="t">Borrowing</span><span class="d">Who pays what to borrow. The page is coming soon; '
             'the loan calculator works now: <b>work out your own loan →</b></span></a>')

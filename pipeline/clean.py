@@ -58,6 +58,11 @@ TRAP_NOTES = {
         "straight line across it; no calculation uses it. (Not applied to the interbank call rate, "
         "which really does swing that much.)"
     ),
+    "us_cpi_oct_2025": (
+        "US prices come from FRED (series CPIAUCSL, collected by the US Bureau of Labor Statistics). "
+        "October 2025 was never published because of a US government shutdown, so we use the point "
+        "halfway between September and November."
+    ),
     "credit_march_2026": (
         "Credit figures for March 2026 are missing from the CBN feed. Charts draw a straight line "
         "between February and April; no calculation uses the filled value."
@@ -284,6 +289,24 @@ def usd_monthly_average(daily):
     out = out[out["usd_days"] > 0].reset_index(drop=True)
     return out, (f"Exchange rate: daily -> monthly average; {duplicates} duplicate days averaged; "
                  f"one-day typos removed: {typos}.")
+
+
+def parse_us_cpi(text):
+    """US consumer price index (FRED CPIAUCSL, 1982-84 = 100) and US year-on-year inflation.
+
+    Trap: October 2025 was never published (US government shutdown). One row per month is enforced,
+    and that gap is filled halfway between September and November, as in naira-scenarios (2g).
+    """
+    from io import StringIO
+    df = pd.read_csv(StringIO(text), parse_dates=["observation_date"])
+    cpi = pd.to_numeric(df["CPIAUCSL"], errors="coerce")  # FRED writes missing values as "."
+    cpi.index = df["observation_date"]
+    cpi = cpi.asfreq("MS")
+    gaps = cpi.index[cpi.isna()].strftime("%Y-%m").tolist()
+    cpi = cpi.interpolate(limit_area="inside")
+    out = pd.DataFrame({"us_cpi": cpi, "us_inflation": cpi.pct_change(12, fill_method=None) * 100})
+    out.index.name = "month"
+    return out.reset_index(), f"US CPI (FRED): gaps filled halfway between neighbours: {gaps}."
 
 
 def crude_monthly_average(daily):

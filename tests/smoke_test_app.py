@@ -76,6 +76,32 @@ def main():
     at = run("pages/savings.py", state={"kept": []})
     assert "Pick where the money was kept" in everything(at)
     print("ok  nothing ticked: mattress baseline still shown, with a hint")
+    # ---------------------------------------------------------------- Prices
+    at = run("pages/prices.py")
+    text = everything(at)
+    assert "How fast are prices rising?" in text and "14.63%" in text and "19.59%" in text
+    assert "6.5% to 22.4%" in text, "Sep 2027 headline range (article: 6.5 to 22.4) not on screen"
+    assert "The January 2025 rebasing" in text and "What this means" in text
+    print("ok  Prices renders: hero, key numbers, chart, 2025 note, forecast range 6.5% to 22.4% for Sep 2027")
+    print("    What this means:", text.split("What this means</h2><p>")[1].split("</p>")[0])
+    at = run("pages/prices.py", state={"infl_measures": [], "infl_period": "Since 2003", "fc_measure": "Food"})
+    assert "7.8% to 31.4%" in everything(at), "Sep 2027 food range (article: 7.8 to 31.4) not on screen"
+    print("ok  Prices with no measure ticked falls back to headline; food forecast range 7.8% to 31.4%")
+
+    # ---------------------------------------------------------------- The naira
+    at = run("pages/naira.py")
+    text = everything(at)
+    assert "How much is the naira worth?" in text and "₦1,326.81" in text
+    for rng in ["₦1,130 – ₦2,030", "₦1,090 – ₦3,390", "₦1,090 – ₦6,870"]:
+        assert rng in text, f"outlook range {rng} not on screen"
+    print("ok  The naira renders: hero, history, outlook ranges match the article (Sep 2027/2028/2030)")
+    print("    What this means:", text.split("What this means</h2><p>")[1].split("</p>")[0])
+    published = {"Stable reforms": "₦1,230 – ₦2,010", "History repeats": "₦1,390 – ₦3,000",
+                 "Oil shock": "₦2,090 – ₦4,500", "Policy reversal": "₦2,060 – ₦3,440"}
+    for name, rng in published.items():
+        at = run("pages/naira.py", state={"scenario": name, "fx_scale": "Log", "fx_period": "Last 2 years"})
+        assert rng in everything(at), f"{name}: {rng} not on screen"
+    print("ok  all four scenarios show the article's Sep 2030 ranges; log scale and short period render")
     print("All app smoke tests passed.")
 
 

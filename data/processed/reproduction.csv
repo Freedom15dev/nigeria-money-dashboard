@@ -1,0 +1,48 @@
+model,what,published,ours,difference,ok,tolerance
+Inflation,headline Mar 2027 forecast,14.4,14.43,0.03,True,rounds to 0.1
+Inflation,headline Mar 2027 low80,8.9,8.91,0.01,True,rounds to 0.1
+Inflation,headline Mar 2027 high80,19.9,19.94,0.04,True,rounds to 0.1
+Inflation,headline Mar 2027 naira scenario (project's ₦/$),12.8,12.81,0.01,True,rounds to 0.1
+Inflation,headline Mar 2027 naira scenario (dashboard ₦/$),12.8,12.71,-0.09,True,info only
+Inflation,headline Sep 2027 forecast,14.4,14.43,0.03,True,rounds to 0.1
+Inflation,headline Sep 2027 low80,6.5,6.45,-0.05,True,rounds to 0.1
+Inflation,headline Sep 2027 high80,22.4,22.4,-0.0,True,rounds to 0.1
+Inflation,headline Sep 2027 naira scenario (project's ₦/$),11.8,11.75,-0.05,True,rounds to 0.1
+Inflation,headline Sep 2027 naira scenario (dashboard ₦/$),11.8,11.61,-0.19,True,info only
+Inflation,food Mar 2027 forecast,19.6,19.59,-0.01,True,rounds to 0.1
+Inflation,food Mar 2027 low80,11.4,11.39,-0.01,True,rounds to 0.1
+Inflation,food Mar 2027 high80,27.8,27.8,-0.0,True,rounds to 0.1
+Inflation,food Mar 2027 naira scenario (project's ₦/$),16.9,16.91,0.01,True,rounds to 0.1
+Inflation,food Mar 2027 naira scenario (dashboard ₦/$),16.9,16.72,-0.18,True,info only
+Inflation,food Sep 2027 forecast,19.6,19.59,-0.01,True,rounds to 0.1
+Inflation,food Sep 2027 low80,7.8,7.79,-0.01,True,rounds to 0.1
+Inflation,food Sep 2027 high80,31.4,31.4,-0.0,True,rounds to 0.1
+Inflation,food Sep 2027 naira scenario (project's ₦/$),15.1,15.08,-0.02,True,rounds to 0.1
+Inflation,food Sep 2027 naira scenario (dashboard ₦/$),15.1,14.8,-0.3,True,info only
+Naira outlook,Sep 2027 low80,1130.0,1132.0,2.0,True,rounds to ₦10
+Naira outlook,Sep 2027 low50,1330.0,1335.0,5.0,True,rounds to ₦10
+Naira outlook,Sep 2027 median,1400.0,1403.0,3.0,True,rounds to ₦10
+Naira outlook,Sep 2027 high50,1670.0,1668.0,-2.0,True,rounds to ₦10
+Naira outlook,Sep 2027 high80,2030.0,2032.0,2.0,True,rounds to ₦10
+Naira outlook,Sep 2028 low80,1090.0,1088.0,-2.0,True,rounds to ₦10
+Naira outlook,Sep 2028 low50,1390.0,1392.0,2.0,True,rounds to ₦10
+Naira outlook,Sep 2028 median,1530.0,1534.0,4.0,True,rounds to ₦10
+Naira outlook,Sep 2028 high50,2310.0,2312.0,2.0,True,rounds to ₦10
+Naira outlook,Sep 2028 high80,3390.0,3393.0,3.0,True,rounds to ₦10
+Naira outlook,Sep 2030 low80,1090.0,1088.0,-2.0,True,rounds to ₦10
+Naira outlook,Sep 2030 low50,1580.0,1577.0,-3.0,True,rounds to ₦10
+Naira outlook,Sep 2030 median,1880.0,1882.0,2.0,True,rounds to ₦10
+Naira outlook,Sep 2030 high50,4070.0,4066.0,-4.0,True,rounds to ₦10
+Naira outlook,Sep 2030 high80,6870.0,6871.0,1.0,True,rounds to ₦10
+Naira scenario,Stable reforms Sep 2030 low80,1230.0,1234.0,4.0,True,rounds to ₦10
+Naira scenario,Stable reforms Sep 2030 median,1500.0,1495.0,-5.0,True,rounds to ₦10
+Naira scenario,Stable reforms Sep 2030 high80,2010.0,2013.0,3.0,True,rounds to ₦10
+Naira scenario,History repeats Sep 2030 low80,1390.0,1394.0,4.0,True,rounds to ₦10
+Naira scenario,History repeats Sep 2030 median,1880.0,1882.0,2.0,True,rounds to ₦10
+Naira scenario,History repeats Sep 2030 high80,3000.0,3000.0,0.0,True,rounds to ₦10
+Naira scenario,Oil shock Sep 2030 low80,2090.0,2091.0,1.0,True,rounds to ₦10
+Naira scenario,Oil shock Sep 2030 median,2820.0,2823.0,3.0,True,rounds to ₦10
+Naira scenario,Oil shock Sep 2030 high80,4500.0,4501.0,1.0,True,rounds to ₦10
+Naira scenario,Policy reversal Sep 2030 low80,2060.0,2055.0,-5.0,True,rounds to ₦10
+Naira scenario,Policy reversal Sep 2030 median,2430.0,2429.0,-1.0,True,rounds to ₦10
+Naira scenario,Policy reversal Sep 2030 high80,3440.0,3439.0,-1.0,True,rounds to ₦10

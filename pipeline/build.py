@@ -33,7 +33,16 @@ def parse_all(raw):
         "credit": clean.parse_credit(raw["money_credit"]),
         "usd": usd_monthly,
         "crude": clean.crude_monthly_average(clean.parse_crude_daily(raw["crude"])),
+        "us": clean.parse_us_cpi(raw["us_cpi"])[0],
     }
+
+
+def load_all_raw():
+    """Every raw source: the CBN feeds plus the FRED US CPI file."""
+    from fetch import FEEDS, load_raw, load_us_cpi_text
+    raw = {name: load_raw(name) for name in FEEDS}
+    raw["us_cpi"] = load_us_cpi_text()
+    return raw
 
 
 def find_latest_month(infl, mm, usd):
@@ -67,6 +76,7 @@ def build_panel(raw):
 
     credit, line = clean.note_negative_government_credit(parsed["credit"]); log.append(line)
     credit, line = clean.fill_credit_for_charts(credit, months); log.append(line)
+    _, line = clean.parse_us_cpi(raw["us_cpi"]); log.append(line)
 
     panel = (
         pd.DataFrame({"month": months})
@@ -75,6 +85,7 @@ def build_panel(raw):
         .merge(usd, on="month", how="left")
         .merge(parsed["crude"], on="month", how="left")
         .merge(credit, on="month", how="left")
+        .merge(parsed["us"], on="month", how="left")
     )
     panel["usd_days"] = panel["usd_days"].astype("Int64")
     panel["crude_days"] = panel["crude_days"].astype("Int64")
@@ -105,9 +116,7 @@ def to_float_rounded(panel):
 
 
 if __name__ == "__main__":
-    from fetch import load_raw, FEEDS
-    raw = {name: load_raw(name) for name in FEEDS}
-    panel, log, latest = build_panel(raw)
+    panel, log, latest = build_panel(load_all_raw())
     print("\n".join(log))
     print(f"Panel: {len(panel)} months, latest {latest:%B %Y}")
     print(panel.tail(3).T)

@@ -42,7 +42,7 @@ ARTICLES = {
 
 # Pages in the header (paths as given to st.Page in Home.py). None = not built yet, shown as "soon".
 NAV_PAGES = {"Home": "pages/home.py", "My savings": "pages/savings.py",
-             "Prices": None, "The naira": None, "Borrowing": None}
+             "Prices": "pages/prices.py", "The naira": "pages/naira.py", "Borrowing": None}
 
 # --------------------------------------------------------------------------- colours (design/)
 NAVY, BLUE, ORANGE, ORANGE_LIGHT = "#0F1E33", "#2A6FDB", "#D9822B", "#F0A65E"
@@ -65,6 +65,13 @@ HELP = {
     "max": "The maximum lending rate: the average rate banks charge their riskiest borrowers. Small businesses and individuals often pay this or more.",
     "savings": "The average interest a bank savings account pays in a year, before tax (CBN average across banks).",
     "real": "The real rate is the interest rate after inflation. Below zero means money in the account buys less each year, even though the balance grows.",
+    "food": "Food inflation: how much food prices are higher than 12 months ago.",
+    "core": "Core inflation: price rises leaving out farm produce and energy, which jump around the most. It shows the steadier, underlying trend.",
+    "range": "A range, not a prediction. An 80% range should contain the real figure about 4 times in 5, and a 50% range about half the time. The real figure can still land outside it.",
+    "log": "On a log scale each step up the axis is the same % change, so ₦100 → ₦200 looks as big as ₦1,000 → ₦2,000. It shows the early years clearly.",
+    "jump": "A jump month: the naira lost more than 5% of its value against the dollar in a single month.",
+    "ppp": "Purchasing power parity (PPP): the idea that, over the years, a currency weakens by about the gap between its inflation and the other country's inflation.",
+    "scenario": "A scenario is an 'if → then' story, not a forecast: if this happens, the rate would likely end up around here.",
 }
 
 e = html.escape  # short name for escaping text put into HTML
@@ -161,10 +168,10 @@ h1 a, h2 a, h3 a {display: none !important;}
 .st-key-explore {gap: 16px !important;}
 .st-key-explore > * {flex: 1 1 240px !important; min-width: 0 !important;}
 .st-key-explore .mm-card {height: 100%;}
-.st-key-explore-savings {background: #FFFFFF; border: 1px solid #E3E6EB; border-top: 4px solid #2A6FDB;
+[class*="st-key-explore-"] {background: #FFFFFF; border: 1px solid #E3E6EB; border-top: 4px solid #2A6FDB;
   border-radius: 14px; padding: 22px; gap: 8px !important;}
-.st-key-explore-savings [data-testid="stPageLink-NavLink"] {padding: 0; background: none !important;}
-.st-key-explore-savings [data-testid="stPageLink-NavLink"] p {color: #2A6FDB !important; font-weight: 600 !important; font-size: 14px;}
+[class*="st-key-explore-"] [data-testid="stPageLink-NavLink"] {padding: 0; background: none !important;}
+[class*="st-key-explore-"] [data-testid="stPageLink-NavLink"] p {color: #2A6FDB !important; font-weight: 600 !important; font-size: 14px;}
 
 /* ---------- page intro ---------- */
 .mm-intro {display: flex; flex-direction: column; gap: 12px; max-width: 800px; padding-top: 48px;}
@@ -253,9 +260,9 @@ a.mm-explore:hover {border-color: #CBD2DC; box-shadow: 0 2px 10px rgba(15,30,51,
 .mm-means p {font-size: 16px; line-height: 1.6; color: #2D3A4F;}
 
 /* ---------- white panels made from st.container(key=...) ---------- */
-.st-key-panel-inputs, .st-key-panel-chart {background: #FFFFFF; border: 1px solid #E3E6EB !important;
+[class*="st-key-panel-"] {background: #FFFFFF; border: 1px solid #E3E6EB !important;
   border-radius: 16px; padding: 28px;}
-.st-key-panel-chart h2 {font-family: 'Space Grotesk', Arial, sans-serif; font-size: 22px; font-weight: 700; margin: 0; padding: 0;}
+[class*="st-key-panel-"] h2 {font-family: 'Space Grotesk', Arial, sans-serif; font-size: 22px; font-weight: 700; margin: 0; padding: 0;}
 .mm-legend {display: flex; flex-wrap: wrap; gap: 10px 22px; font-size: 14px; margin: 0; padding: 0; list-style: none;}
 .mm-legend li {display: flex; align-items: center; gap: 8px; margin: 0;}
 .mm-legend .sw {width: 18px; height: 4px; border-radius: 2px;}
@@ -278,16 +285,24 @@ a.mm-explore:hover {border-color: #CBD2DC; box-shadow: 0 2px 10px rgba(15,30,51,
 .st-key-dates [data-testid="stColumn"] {min-width: 0 !important;}
 .mm-hint {font-weight: 400; color: #4A5568;}
 
-/* pills: unselected white with grey border; selected navy with a tick (the "kept" choices) */
+/* pills: unselected white with grey border. Pick-several pills (multi) turn navy with a tick;
+   pick-one pills (single) turn light blue, like the mockup's quick amounts. */
 [data-testid="stButtonGroup"] button[data-variant="pills"] {border-radius: 999px !important; height: 40px;
   padding: 0 16px; background: #FFFFFF !important; border: 1px solid #CBD2DC !important;}
 [data-testid="stButtonGroup"] button[data-variant="pills"] p {font-size: 14px; color: #0F1E33 !important;}
-.st-key-kept button[data-selected="true"] {background: #0F1E33 !important; border-color: #0F1E33 !important;}
-.st-key-kept button[data-selected="true"] p {color: #FFFFFF !important; font-weight: 600;}
-.st-key-kept button[data-selected="true"] p::before {content: "✓ ";}
+[data-testid="stButtonGroup"] button[data-selected="true"] {background: #0F1E33 !important; border-color: #0F1E33 !important;}
+[data-testid="stButtonGroup"] button[data-selected="true"] p {color: #FFFFFF !important; font-weight: 600;}
+[data-testid="stButtonGroup"] button[data-selected="true"] p::before {content: "✓ ";}
+[data-testid="stButtonGroup"] button[aria-checked="true"] {background: #EAF1FC !important; border-color: #2A6FDB !important;}
+[data-testid="stButtonGroup"] button[aria-checked="true"] p {color: #1B4FA8 !important; font-weight: 600;}
 .st-key-quick button[data-variant="pills"] {height: 36px; padding: 0 14px;}
-.st-key-quick button[aria-checked="true"] {background: #EAF1FC !important; border-color: #2A6FDB !important;}
-.st-key-quick button[aria-checked="true"] p {color: #1B4FA8 !important; font-weight: 600;}
+/* range cards (Prices and The naira) */
+.mm-range .num {font-size: 24px;}
+.mm-range .when {font-size: 13px; font-weight: 700; color: #2A6FDB; letter-spacing: 0.5px;}
+.mm-note {background: #FFFFFF; border: 1px solid #E3E6EB; border-left: 4px solid #D9822B; border-radius: 12px;
+  padding: 18px 22px; display: flex; flex-direction: column; gap: 8px;}
+.mm-note h3 {margin: 0; padding: 0; font-family: Inter, Arial, sans-serif; font-size: 16px; font-weight: 700; color: #0F1E33;}
+.mm-note p {font-size: 14px; line-height: 1.6; color: #2D3A4F;}
 
 /* expanders as white cards */
 [data-testid="stExpander"] details {background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 12px;}
@@ -328,8 +343,8 @@ a.mm-explore:hover {border-color: #CBD2DC; box-shadow: 0 2px 10px rgba(15,30,51,
   .mm-cards.rank-cards {display: none;}
   .mm-list {display: flex;}
   .mm-kpi .num {font-size: 28px;}
-  .st-key-panel-inputs, .st-key-panel-chart {padding: 18px; border-radius: 14px;}
-  .st-key-panel-chart h2 {font-size: 18px;}
+  [class*="st-key-panel-"] {padding: 18px; border-radius: 14px;}
+  [class*="st-key-panel-"] h2 {font-size: 18px;}
   .mm-means {padding: 18px; border-radius: 14px;}
   .mm-means h2 {font-size: 18px;}
   .mm-means p {font-size: 15px;}
@@ -414,6 +429,32 @@ def change_badge(change_pct, size="", short=False):
     return f'<span class="mm-pill good {size}">{words}</span>'
 
 
+def change_text(x, unit, good_when, words):
+    """A coloured 12-month change plus a plain-words note, for key-number cards.
+    unit: 'pts' (percentage points) or '%'. good_when: 'up', 'down' or None (neutral, navy)."""
+    if pd.isna(x) or abs(x) < 0.005:
+        return f'<b style="color:{NAVY}">no change</b> · {e(words)}'
+    colour = NAVY if good_when is None else GOOD if (x > 0) == (good_when == "up") else BAD
+    amount = f"{abs(x):.2f} pts" if unit == "pts" else f"{abs(x):.1f}%"
+    return f'<b style="color:{colour}">{"↑" if x > 0 else "↓"} {amount}</b> · {e(words)}'
+
+
+def kpi_card(title, value, change_html, help_text, value_colour=NAVY):
+    """One key-number card (HTML); put several in <div class="mm mm-cards">."""
+    return (f'<article class="mm-card mm-kpi"><h3>{e(title)}<span class="mm-tip" title="{e(help_text)}" '
+            f'aria-label="{e(help_text)}">ⓘ</span></h3>'
+            f'<p class="num" style="color:{value_colour}">{value}</p><p class="chg">{change_html}</p></article>')
+
+
+def load_csv(name, dates=("month",)):
+    return _load_csv(name, tuple(dates))
+
+
+@st.cache_data(show_spinner=False)
+def _load_csv(name, dates):
+    return pd.read_csv(PROCESSED / name, parse_dates=list(dates))
+
+
 def info_box(title, text_html):
     """The warm 'What this means' box."""
     st.html(f'<section class="mm mm-means"><h2>{e(title)}</h2><p>{text_html}</p></section>')
@@ -458,6 +499,19 @@ def style_figure(fig, height=320):
     )
     fig.update_xaxes(showgrid=False, linecolor="#E3E6EB", tickfont=dict(color=MUTED, size=12))
     fig.update_yaxes(gridcolor=GRID, zeroline=False, tickfont=dict(color=MUTED, size=12))
+    return fig
+
+
+NICE_NAIRA = [100, 150, 200, 300, 500, 700, 1000, 1500, 2000, 3000, 5000, 7000, 10000, 15000, 20000]
+
+
+def naira_log_axis(fig, low, high, axis="y", sparse=False):
+    """A log-scale ₦ axis with a few round labels instead of Plotly's crowded minor ticks.
+    sparse=True keeps only 1-2-3-5 steps, for short axes on phones."""
+    nice = [t for t in NICE_NAIRA if not sparse or str(t)[0] in "1235" and t not in (150, 1500, 15000)]
+    ticks = [t for t in nice if low * 0.9 <= t <= high * 1.1]
+    update = fig.update_yaxes if axis == "y" else fig.update_xaxes
+    update(type="log", tickvals=ticks, ticktext=[f"₦{t:,}" for t in ticks], tickangle=0, minor=dict(showgrid=False))
     return fig
 
 

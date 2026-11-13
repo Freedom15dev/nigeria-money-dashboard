@@ -1,7 +1,7 @@
 {
   "latest_month": "2026-09-01",
   "latest_month_label": "September 2026",
-  "built_at_utc": "2026-11-13T12:44:12+00:00",
+  "built_at_utc": "2026-11-13T12:57:35+00:00",
   "pulled_at_utc": {
     "inflation": "2026-11-13T10:26:29+00:00",
     "money_market": "2026-11-13T10:26:29+00:00",
@@ -10,7 +10,10 @@
     "crude": "2026-11-13T10:26:29+00:00"
   },
   "rows": {
-    "panel": 285
+    "panel": 285,
+    "forecast": 24,
+    "naira_outlook": 48,
+    "naira_scenarios": 192
   },
   "panel_start": "2003-01-01",
   "run_log": [
@@ -22,6 +25,7 @@
     "Exchange rate: daily -> monthly average; 6 duplicate days averaged; one-day typos removed: ['2003-12-09 (₦1,376.80 vs ₦136.80 nearby)', '2007-08-28 (₦74.52 vs ₦124.45 nearby)', '2008-08-01 (₦66.09 vs ₦116.09 nearby)'].",
     "Credit to government below zero in 93 months: kept as published (net lender).",
     "Credit gaps filled for charts only: ['2026-03'].",
+    "US CPI (FRED): gaps filled halfway between neighbours: ['2025-10'].",
     "Known difference: usd_ngn 2007-08: nigeria-savings-vs-inflation had 122.6355, now 124.9267 (method: this month had a one-day typo in the CBN feed, which naira-scenarios (and this dashboard) drops; this earlier project kept it)",
     "Known difference: usd_ngn 2008-08: nigeria-savings-vs-inflation had 113.6952, now 116.0755 (method: this month had a one-day typo in the CBN feed, which naira-scenarios (and this dashboard) drops; this earlier project kept it)",
     "Known difference: usd_ngn 2022-03: nigeria-savings-vs-inflation had 415.8309, now 415.8316 (method: this month has a day listed twice with two different rates; naira-scenarios (and this dashboard) averages the two; this earlier project kept only one)",
@@ -35,7 +39,8 @@
     "Known difference: usd_ngn 2024-02: nigeria-inflation-forecast had 1,504.8200, now 1,506.8361 (method: this month has a day listed twice with two different rates; naira-scenarios (and this dashboard) averages the two; this earlier project kept only one)",
     "Known difference: usd_ngn 2024-07: nigeria-inflation-forecast had 1,557.5700, now 1,559.6515 (method: this month has a day listed twice with two different rates; naira-scenarios (and this dashboard) averages the two; this earlier project kept only one)",
     "Reference snapshot: every value up to Sep 2026 matches the four earlier projects, apart from the 12 known differences listed above.",
-    "Savings article reproduced: all five options match to within ₦2."
+    "Savings article reproduced: all five options match to within ₦2.",
+    "Models reproduce the articles on data to Sep 2026: all 43 published numbers match (inflation to 0.1 point, naira to the nearest ₦10)."
   ],
   "trap_notes": {
     "revised_2025_inflation": "In January 2026 the NBS revised its 2025 inflation figures, raising each month by about 3 points (the January 2025 rebasing had used the wrong base period). The CBN feed holds the revised figures and we use them as they are, so 2025 inflation here is higher than the numbers first reported in the news.",
@@ -44,8 +49,71 @@
     "policy_rate": "The Monetary Policy Rate (MPR) only started in December 2006. Before that the CBN's main rate was the Minimum Rediscount Rate (MRR), and the feed shows the MPR as 0. We use one 'policy rate' column: the MRR before December 2006 and the MPR after.",
     "tbill_zeros": "The Treasury bill rate shows 0.00% in December 2017 and December 2018, between months of 11-13%. A 0% rate never happened, so we treat both as missing. For the savings calculator we carry the previous month's rate forward for those two months.",
     "rate_spikes": "A few rates jump for a single month and snap straight back, which is a glitch in the feed, not history. For example the prime lending rate shows 11.90% in September 2025, between 18.88% in August and 18.89% in October. Our rule: a month more than 5 points away from both neighbours, while the neighbours agree within 1 point, is treated as missing. Charts draw a straight line across it; no calculation uses it. (Not applied to the interbank call rate, which really does swing that much.)",
+    "us_cpi_oct_2025": "US prices come from FRED (series CPIAUCSL, collected by the US Bureau of Labor Statistics). October 2025 was never published because of a US government shutdown, so we use the point halfway between September and November.",
     "credit_march_2026": "Credit figures for March 2026 are missing from the CBN feed. Charts draw a straight line between February and April; no calculation uses the filled value.",
     "credit_to_government_negative": "Credit to government is below zero in many months up to 2014. That is real, not an error: the government kept more money in the banks than it borrowed, so on balance it was a lender.",
     "exchange_rates": "The CBN publishes the official rate daily. We average each month's days to get one monthly rate and record how many days went into each average. A few days appear twice; we average the two. Three days are clear typing errors (for example ₦1,376.80 on 9 December 2003, when the days around it were about ₦136.80); a day more than 25% away from the 11 trading days around it is dropped. This is the official rate only, not the parallel (street) market rate."
+  },
+  "models": {
+    "inflation": {
+      "headline": {
+        "Rebased": -6.9589,
+        "ar.L1": 0.2118,
+        "sigma2": 2.0891
+      },
+      "food": {
+        "Rebased": -9.7426,
+        "ar.L1": 0.1757,
+        "sigma2": 4.967
+      },
+      "naira_yoy_held": -11.39
+    },
+    "naira": {
+      "seed": 42,
+      "paths": 5000,
+      "horizon_months": 48,
+      "jump_chance": 0.0572,
+      "jumps": 17,
+      "months": 297,
+      "backtest_starts": "Mar 2010 to Sep 2022 (51 start dates)",
+      "margins_top80": {
+        "12": 0.137,
+        "24": 0.437,
+        "36": 0.886,
+        "48": 0.829
+      },
+      "margins_top50": {
+        "12": 0.079,
+        "24": 0.249,
+        "36": 0.497,
+        "48": 0.553
+      },
+      "biggest_float_fall": {
+        "6": -0.117,
+        "12": -0.147,
+        "18": -0.18,
+        "24": -0.18
+      },
+      "inflation_gap_now_monthly_log": 0.00964,
+      "policy_reversal_catch_up": 0.575,
+      "scenarios": {
+        "Stable reforms": {
+          "story": "The float holds, reserves stay healthy and inflation keeps easing.",
+          "change": "Jumps become rarer: 2% a month (about one in 4 years) instead of the historical rate."
+        },
+        "History repeats": {
+          "story": "The next 4 years look like 2002 to today on average.",
+          "change": "Nothing changed: the plain jump model, built from the naira's own history."
+        },
+        "Oil shock": {
+          "story": "Oil prices crash in year 1, and a devaluation the size of 2016 follows.",
+          "change": "A forced 50% devaluation in month 12, on top of normal history."
+        },
+        "Policy reversal": {
+          "story": "The CBN holds the official rate fixed for 2 years, then devalues to catch up, overshooting.",
+          "change": "Rate frozen for 24 months, then a jump in month 25 equal to the inflation gap built up, plus 25%."
+        }
+      }
+    }
   }
 }

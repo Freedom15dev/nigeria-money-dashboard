@@ -183,6 +183,33 @@ def check_article(panel):
     return errors, log
 
 
+# --------------------------------------------------------------------------- 6. the models
+def check_models(reproduction, forecast, outlook):
+    """The ported models must still reproduce the published articles on data to Sep 2026,
+    and today's outputs must be well formed (ranges in order, nothing missing)."""
+    errors, log = [], []
+    bad = reproduction[~reproduction["ok"]]
+    for _, r in bad.iterrows():
+        errors.append(f"Model no longer reproduces the article: {r['model']} {r['what']}: "
+                      f"published {r['published']}, now {r['ours']}")
+    if bad.empty:
+        checked = reproduction[reproduction["tolerance"] != "info only"]
+        log.append(f"Models reproduce the articles on data to Sep 2026: all {len(checked)} published "
+                   "numbers match (inflation to 0.1 point, naira to the nearest ₦10).")
+
+    for measure, part in forecast.groupby("measure"):
+        if len(part) != 12 or part[["forecast", "low80", "high80"]].isna().any().any():
+            errors.append(f"Inflation forecast ({measure}) is not 12 complete months.")
+        if not ((part["low80"] <= part["forecast"]) & (part["forecast"] <= part["high80"])).all():
+            errors.append(f"Inflation forecast ({measure}): the forecast is outside its own range.")
+    cols = ["low80", "low50", "median", "high50", "high80"]
+    if outlook[cols].isna().any().any() or (outlook[cols] <= 0).any().any():
+        errors.append("Naira outlook has missing or non-positive values.")
+    elif not all((outlook[a] <= outlook[b]).all() for a, b in zip(cols, cols[1:])):
+        errors.append("Naira outlook ranges are out of order.")
+    return errors, log
+
+
 # --------------------------------------------------------------------------- all together
 def validate(panel, parsed, latest, previous_meta):
     errors, log = [], []

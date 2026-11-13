@@ -22,6 +22,7 @@ sys.path.insert(0, str(HERE))
 import build  # noqa: E402
 import clean  # noqa: E402
 import fetch  # noqa: E402
+import models  # noqa: E402
 import validate  # noqa: E402
 
 PROCESSED = HERE.parent / "data" / "processed"
@@ -49,11 +50,11 @@ def main(offline=False):
         try:
             fetch.fetch_all()
         except Exception as error:  # network, blocked, broken JSON: all mean "keep the old data"
-            fail(f"could not download the CBN feeds ({error}).")
+            fail(f"could not download the CBN feeds or FRED ({error}).")
 
     print("2. Clean and build")
     try:
-        raw = {name: fetch.load_raw(name) for name in fetch.FEEDS}
+        raw = build.load_all_raw()
         panel, log, latest = build.build_panel(raw)
         parsed = build.parse_all(raw)
     except Exception as error:
@@ -62,12 +63,23 @@ def main(offline=False):
         print(f"  {line}")
     print(f"  Panel: {len(panel)} months, {panel['month'].min():%b %Y} to {latest:%b %Y}")
 
-    print("3. Models")
-    print("  (inflation forecast and naira outlook are added in Phase 2)")
+    print("3. Models (about a minute: 5,000 simulated paths at 50+ backtest dates)")
+    try:
+        forecast, forecast_notes = models.inflation_forecast(panel)
+        rates, ng, us = models.naira_inputs(parsed, panel)
+        outlook, scenarios, naira_notes = models.naira_outlook(rates, ng, us)
+        reproduction = models.reproduce(panel, parsed)
+    except Exception as error:
+        fail(f"a model failed ({type(error).__name__}: {error}).")
+    print(f"  Inflation forecast: {forecast['month'].min():%b %Y} to {forecast['month'].max():%b %Y}")
+    print(f"  Naira outlook: {outlook['month'].min():%b %Y} to {outlook['month'].max():%b %Y}, 4 scenarios")
 
     print("4. Validate")
     previous_meta = json.loads(META_PATH.read_text(encoding="utf-8")) if META_PATH.exists() else {}
     errors, vlog = validate.validate(panel, parsed, latest, previous_meta)
+    e2, l2 = validate.check_models(reproduction, forecast, outlook)
+    errors += e2
+    vlog += l2
     for line in vlog:
         print(f"  {line}")
     if errors:
@@ -84,18 +96,32 @@ def main(offline=False):
         "latest_month_label": f"{latest:%B %Y}",
         "built_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "pulled_at_utc": {name: m["pulled_at_utc"] for name, m in manifest.items()},
-        "rows": {"panel": len(panel)},
+        "rows": {"panel": len(panel), "forecast": len(forecast), "naira_outlook": len(outlook),
+                 "naira_scenarios": len(scenarios)},
         "panel_start": f"{panel['month'].min():%Y-%m-%d}",
         "run_log": log + vlog,
         "trap_notes": clean.TRAP_NOTES,
+        "models": {"inflation": forecast_notes, "naira": naira_notes},
     }
-    old_panel = PANEL_PATH.read_text(encoding="utf-8") if PANEL_PATH.exists() else None
-    new_panel = build.to_float_rounded(panel).to_csv(index=False, date_format="%Y-%m-%d", lineterminator="\n")
-    write_atomically(PANEL_PATH, new_panel)
-    # Keep meta.json unchanged when the data is unchanged, so a quiet month makes no commit.
-    if old_panel != new_panel or not META_PATH.exists():
+
+    def csv(df):
+        return build.to_float_rounded(df).to_csv(index=False, date_format="%Y-%m-%d", lineterminator="\n")
+
+    outputs = {
+        PANEL_PATH: csv(panel),
+        PROCESSED / "forecast.csv": csv(forecast),
+        PROCESSED / "naira_outlook.csv": csv(outlook),
+        PROCESSED / "naira_scenarios.csv": csv(scenarios),
+        PROCESSED / "reproduction.csv": reproduction.to_csv(index=False, lineterminator="\n"),
+    }
+    changed = [p.name for p, text in outputs.items()
+               if not p.exists() or p.read_text(encoding="utf-8") != text]
+    for path, text in outputs.items():
+        write_atomically(path, text)
+    # Keep meta.json unchanged when nothing changed, so a quiet month makes no commit.
+    if changed or not META_PATH.exists():
         write_atomically(META_PATH, json.dumps(meta, indent=2, ensure_ascii=False) + "\n")
-        print(f"  Saved {PANEL_PATH.name} and {META_PATH.name}: data up to {meta['latest_month_label']}.")
+        print(f"  Saved {', '.join(changed)} and {META_PATH.name}: data up to {meta['latest_month_label']}.")
     else:
         print("  No change in the data since the last run.")
 
