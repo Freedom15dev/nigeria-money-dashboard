@@ -3,7 +3,7 @@
 import pandas as pd
 import streamlit as st
 
-from components import (BAD, DESCRIPTION, GOOD, HELP, LOAN_CALCULATOR_URL, NAVY, SUPPORTING_LINE, TAGLINE,
+from components import (BAD, DESCRIPTION, GOOD, HELP, NAVY, SUPPORTING_LINE, TAGLINE,
                         brand_header, change_text, e, footer, kpi_card, load_meta, load_panel, naira, page_intro,
                         pct, section_head)
 
@@ -110,10 +110,12 @@ section_head("Explore")
 EXPLORE = [  # (key, title, description, page, link text)
     ("savings", "My savings", "What is money you saved in a past year worth today?", "views/savings.py",
      "Work out my savings →"),
+    ("loan", "My loan", "What will a loan really cost you? Banks and loan apps compared, month by month.",
+     "views/loan.py", "Work out your own loan →"),
     ("prices", "Prices", "Inflation since 2003, and where it may head next.", "views/prices.py", "See prices →"),
     ("naira", "The naira", "20 years of the dollar rate, and the outlook to 2030.", "views/naira.py",
      "See the naira →"),
-    ("borrowing", "Borrowing", "Who pays what to borrow, plus the loan calculator.", "views/borrowing.py",
+    ("borrowing", "Borrowing", "Who pays what to borrow, and who gets the country's credit.", "views/borrowing.py",
      "See borrowing →"),
 ]
 with st.container(key="explore", horizontal=True):
@@ -123,9 +125,6 @@ with st.container(key="explore", horizontal=True):
                     f'<span style="font-size:18px;font-weight:700">{title}</span>'
                     f'<span style="font-size:14px;line-height:1.5;color:#4A5568">{text}</span></div>')
             st.page_link(page, label=link)
-            if key == "borrowing":
-                st.html(f'<a class="mm" href="{LOAN_CALCULATOR_URL}" target="_blank" rel="noopener" '
-                        f'style="font-size:14px;font-weight:600">Work out your own loan →</a>')
 
 with st.expander("About Money Matters"):
     st.write(DESCRIPTION)

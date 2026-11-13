@@ -45,6 +45,8 @@ jobs:
       - name: Self-checks before the update
         run: |
           python src/money_math.py
+          python src/loan_math.py
+          python src/loan_offers.py
           python pipeline/track.py
 
       - name: Run the pipeline (fails, and keeps the old data, if any check fails)

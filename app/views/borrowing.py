@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from components import (BLUE, GREY, HELP, LOAN_CALCULATOR_URL, NAVY, ORANGE, brand_header, change_text,
+from components import (BLUE, GREY, HELP, NAVY, ORANGE, brand_header, change_text,
                         e, footer, info_box, kpi_card, legend, load_meta, load_panel, page_intro, pct, section_head,
                         show_chart, style_figure, under_the_hood)
 
@@ -26,19 +26,22 @@ page_intro("Borrowing", "What does it cost to borrow?",
            "gets the country's credit.", meta)
 
 # ----------------------------------------------------------------------------- the answer (navy hero)
-st.html(
-    f'<section class="mm mm-hero" aria-label="Borrowing this month"><div class="main">'
-    f'<p class="soft">Average bank lending rates, {latest:%B %Y}</p>'
-    f'<div class="figs">'
-    f'<div class="fig"><span class="lbl">Best borrowers (prime)</span><span class="num">{pct(now["primeLending"])}</span></div>'
-    f'<div class="fig"><span class="lbl">Riskier borrowers (maximum)</span><span class="num warm">{pct(now["maxLending"])}</span></div>'
-    f'</div><span class="mm-pill flat">A gap of {now["lending_gap"]:.1f} points between them</span></div>'
-    f'<div class="side"><p>After inflation ({pct(now["inflation"])}), that is <b>{pct(now["real_prime"], 1)}</b> a year for '
-    f'the best borrowers and <b>{pct(now["real_max"], 1)}</b> for riskier ones.</p>'
-    f'<p>Small businesses and individuals usually pay the maximum rate or more. Loan apps price by the month.</p>'
-    f'<a class="mm-cta" href="{LOAN_CALCULATOR_URL}" target="_blank" rel="noopener" style="align-self:flex-start;'
-    f'margin-top:8px">Work out your own loan →</a></div></section>'
-)
+# The navy card is a Streamlit container so its button can be a real st.page_link to My loan.
+with st.container(key="hero-borrow", horizontal=True, vertical_alignment="center"):
+    st.html(
+        f'<section class="mm mm-hero bare" aria-label="Borrowing this month"><div class="main">'
+        f'<p class="soft">Average bank lending rates, {latest:%B %Y}</p>'
+        f'<div class="figs">'
+        f'<div class="fig"><span class="lbl">Best borrowers (prime)</span><span class="num">{pct(now["primeLending"])}</span></div>'
+        f'<div class="fig"><span class="lbl">Riskier borrowers (maximum)</span><span class="num warm">{pct(now["maxLending"])}</span></div>'
+        f'</div><span class="mm-pill flat">A gap of {now["lending_gap"]:.1f} points between them</span></div>'
+        f'<div class="side"><p>After inflation ({pct(now["inflation"])}), that is <b>{pct(now["real_prime"], 1)}</b> a year for '
+        f'the best borrowers and <b>{pct(now["real_max"], 1)}</b> for riskier ones.</p>'
+        f'<p>Small businesses and individuals usually pay the maximum rate or more. Loan apps price by the month.</p>'
+        f'</div></section>'
+    )
+    with st.container(key="cta", width="content"):
+        st.page_link("views/loan.py", label="Work out your own loan →")
 
 
 # ----------------------------------------------------------------------------- key numbers
@@ -155,12 +158,14 @@ with st.container(key="panel-gov"):
     st.caption(meta["trap_notes"]["credit_to_government_negative"])
 
 # ----------------------------------------------------------------------------- loan calculator
-st.html(
-    f'<a class="mm mm-card mm-explore warm" href="{LOAN_CALCULATOR_URL}" target="_blank" rel="noopener" '
-    f'style="display:flex"><span class="t">Work out your own loan →</span>'
-    f'<span class="d">The loan calculator compares a bank loan at the prime and maximum rates with loan-app '
-    f'offers, month by month, and shows what you would really repay. It opens in a new tab.</span></a>'
-)
+with st.container(key="explore", horizontal=True):
+    with st.container(key="explore-borrowing"):
+        st.html('<div class="mm" style="display:flex;flex-direction:column;gap:8px">'
+                '<span style="font-size:18px;font-weight:700">What will your loan really cost?</span>'
+                '<span style="font-size:14px;line-height:1.5;color:#4A5568">My loan compares a bank loan at the '
+                'prime and maximum rates with loan app rates, month by month, and shows what you would really '
+                'repay, including if you pay late.</span></div>')
+        st.page_link("views/loan.py", label="Work out your own loan →")
 
 # ----------------------------------------------------------------------------- what this means
 gap_peak_month = p["lending_gap"].idxmax()

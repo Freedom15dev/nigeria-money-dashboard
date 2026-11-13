@@ -19,6 +19,7 @@ APP = str(ROOT / "app" / "Home.py")
 PROCESSED = ROOT / "data" / "processed"
 sys.path.insert(0, str(ROOT / "src"))
 from money_math import SAVINGS, savings_journey  # noqa: E402
+import loan_offers  # noqa: E402
 
 PANEL = pd.read_csv(PROCESSED / "panel.csv", parse_dates=["month"])
 META = json.loads((PROCESSED / "meta.json").read_text(encoding="utf-8"))
@@ -139,14 +140,61 @@ def main():
     print("ok  all four scenarios show their ranges; log scale and short period render")
 
     # ---------------------------------------------------------------- Borrowing
-    text = everything(run("views/borrowing.py"))
+    at = run("views/borrowing.py")
+    text = everything(at)
     assert "What does it cost to borrow?" in text
     assert pct(NOW["primeLending"]) in text and pct(NOW["maxLending"]) in text
-    assert "Work out your own loan" in text and "naija-loan-cost.streamlit.app" in text
-    print("ok  Borrowing renders: prime and maximum rates, three charts, loan calculator link")
+    loan_links = [x for x in at.get("page_link") if "Work out your own loan" in x.proto.label]
+    assert len(loan_links) == 2 and all(x.proto.page == "loan" for x in loan_links), \
+        [(x.proto.label, x.proto.page) for x in at.get("page_link")]
+    assert "naija-loan-cost.streamlit.app" not in text
+    print("ok  Borrowing renders: prime and maximum rates, three charts, two in-app links to My loan")
+    at = run()
+    assert any(x.proto.page == "loan" for x in at.get("page_link") if "your own loan" in x.proto.label)
+    print("ok  Home has a My loan card that opens the page inside the app")
     print("    What this means:", means(text))
     at = run("views/borrowing.py", state={"borrow_period": "Last 2 years"})
     print("ok  Borrowing with a short period renders")
+
+    # ---------------------------------------------------------------- My loan (spot-checks from the old calculator)
+    bank = loan_offers.bank_rates(PANEL)
+    text = everything(run("views/loan.py"))  # opens on Tunde: ₦100,000, 8.25% a month, 1 month
+    assert "What will this loan really cost me?" in text
+    assert "₦108,250" in text, "Tunde's total (₦108,250) not on screen"
+    tunde_bank_max = f"₦{100_000 * (1 + bank['max_month'] / 100):,.0f}"  # ₦102,718 at the Sep 2026 maximum rate
+    assert tunde_bank_max in text, f"Tunde at the bank maximum rate ({tunde_bank_max}) not on screen"
+    assert f"Bank rates: CBN averages, <b>{bank['month']}</b>" in text
+    assert "Advertised loan app rates, checked Apr–Nov 2026" in text
+    for lender in loan_offers.load_offers()["lender"]:
+        assert lender.split(" ")[0] not in text, f"lender name {lender} on screen"
+    print(f"ok  My loan (Tunde): total ₦108,250; at the {bank['month']} bank maximum rate {tunde_bank_max}; "
+          f"labels shown; no lender names")
+    if bank["month"] == "September 2026":
+        assert tunde_bank_max == "₦102,718"
+        print("ok  ₦102,718 at the Sep 2026 bank maximum rate, as in the old calculator")
+
+    amaka = {"loan_preset": "Amaka: ₦500k, 6 months", "loan_amount": "500,000", "loan_rate": 8.25,
+             "loan_rate_unit": "per month", "loan_length": 6, "loan_length_unit": "months",
+             "loan_method": "Not sure, show me both", "loan_purpose": "Business"}
+    text = everything(run("views/loan.py", state=amaka))
+    assert "₦653,876" in text and "₦747,500" in text, "Amaka: reducing ₦653,876 vs flat ₦747,500 not on screen"
+    print("ok  My loan (Amaka): reducing balance ₦653,876 vs flat ₦747,500")
+
+    text = everything(run("views/loan.py", state={"loan_days_late": 90, "loan_penalty": "Rollover interest",
+                                                  "loan_rollover": 1.0}))
+    assert "₦205,675" in text, "90 days late at 1% a day on ₦108,250 (₦205,675) not on screen"
+    print("ok  My loan late payment: 90 days at 1% a day on ₦108,250 -> ₦205,675")
+
+    text = everything(run("views/loan.py", state={**amaka, "loan_length": 24}))
+    assert "only bank rates are shown" in text and "Loan app:" not in text
+    print("ok  My loan: a 24-month loan is compared with bank rates only")
+
+    for state, message in [({"loan_amount": "0"}, "above ₦0"), ({"loan_amount": "abc"}, "Type the amount in naira"),
+                           ({"loan_rate": 150.0}, "at most 100% a month"),
+                           ({"loan_length": 400, "loan_length_unit": "days"}, "enter the length in months"),
+                           ({"loan_length": 0}, "at least 1 day or 1 month")]:
+        assert message in everything(run("views/loan.py", state=state)), message
+    print("ok  My loan: ₦0, 'abc', 150% a month, 400 days and 0 months give friendly messages")
 
     # ---------------------------------------------------------------- forecast trackers
     text = everything(run("views/prices.py"))

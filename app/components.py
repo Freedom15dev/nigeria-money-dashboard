@@ -31,7 +31,6 @@ DESCRIPTION = (
     "The platform brings together data from multiple research projects into one place, with regular "
     "monthly updates."
 )
-LOAN_CALCULATOR_URL = "https://naija-loan-cost.streamlit.app/"
 GITHUB_URL = "https://github.com/Freedom15dev/nigeria-money-dashboard"
 LINKEDIN_URL = "https://www.linkedin.com/in/freedomoboh"
 PORTFOLIO_URL = "https://oboh.com.ng/"
@@ -43,7 +42,7 @@ ARTICLES = {
 }
 
 # Pages in the header (paths as given to st.Page in Home.py). None = not built yet, shown as "soon".
-NAV_PAGES = {"Home": "views/home.py", "My savings": "views/savings.py",
+NAV_PAGES = {"Home": "views/home.py", "My savings": "views/savings.py", "My loan": "views/loan.py",
              "Prices": "views/prices.py", "The naira": "views/naira.py", "Borrowing": "views/borrowing.py"}
 
 # --------------------------------------------------------------------------- colours (design/)
@@ -103,6 +102,16 @@ def pct(x, decimals=2):
     return f"{'−' if x < 0 else ''}{abs(x):.{decimals}f}%"
 
 
+def parse_naira(text):
+    """'100,000', '₦100000', '100k', '1.5m' -> a number. None if it isn't one."""
+    import re
+    t = str(text).lower().replace("₦", "").replace(",", "").replace(" ", "").replace("naira", "")
+    m = re.fullmatch(r"(\d+(?:\.\d+)?)([km]?)", t)
+    if not m:
+        return None
+    return float(m.group(1)) * {"": 1, "k": 1_000, "m": 1_000_000}[m.group(2)]
+
+
 def short_naira(x):
     """₦50k, ₦1.5m: for axis ticks and quick picks."""
     if abs(x) >= 1_000_000:
@@ -160,9 +169,9 @@ h1 a, h2 a, h3 a {display: none !important;}
 [data-testid="stPopoverBody"] [data-testid="stPageLink-NavLink"] p {font-size: 16px; font-weight: 500;}
 
 /* ---------- Home hero and Explore card that hold a st.page_link ---------- */
-.st-key-hero-home {background: #0F1E33; border-radius: 20px; padding: 32px 36px; gap: 24px 40px !important;}
-.st-key-hero-home .mm-hero.bare {background: none; padding: 0; border-radius: 0;}
-.st-key-hero-home > [data-testid="stElementContainer"]:has(.mm-hero) {flex: 1 1 420px !important;}
+[class*="st-key-hero-"] {background: #0F1E33; border-radius: 20px; padding: 32px 36px; gap: 24px 40px !important;}
+[class*="st-key-hero-"] .mm-hero.bare {background: none; padding: 0; border-radius: 0;}
+[class*="st-key-hero-"] > [data-testid="stElementContainer"]:has(.mm-hero) {flex: 1 1 420px !important;}
 .st-key-cta [data-testid="stPageLink-NavLink"] {height: 52px; padding: 0 22px; border-radius: 12px;
   background: #F0A65E !important; text-decoration: none !important;}
 .st-key-cta [data-testid="stPageLink-NavLink"]:hover {background: #F4B97A !important;}
@@ -173,7 +182,7 @@ h1 a, h2 a, h3 a {display: none !important;}
 [class*="st-key-explore-"] {background: #FFFFFF; border: 1px solid #E3E6EB; border-top: 4px solid #2A6FDB;
   border-radius: 14px; padding: 22px; gap: 8px !important;}
 [class*="st-key-explore-"] [data-testid="stPageLink-NavLink"] {padding: 0; background: none !important;}
-.st-key-explore-borrowing {border-top-color: #D9822B !important;}
+.st-key-explore-borrowing, .st-key-explore-loan {border-top-color: #D9822B !important;}
 [class*="st-key-explore-"] [data-testid="stPageLink-NavLink"] p {color: #2A6FDB !important; font-weight: 600 !important; font-size: 14px;}
 
 /* ---------- page intro ---------- */
@@ -279,17 +288,20 @@ a.mm-explore:hover {border-color: #CBD2DC; box-shadow: 0 2px 10px rgba(15,30,51,
   box-sizing: border-box; align-items: center;}
 .st-key-panel-inputs .react-aria-ComboBox input {font-size: 16px !important; color: #0F1E33;}
 /* the ₦ prefix inside the amount box */
-.st-key-amount [data-testid="stTextInputRootElement"] {display: flex; align-items: center;}
-.st-key-amount [data-testid="stTextInputRootElement"]::before {content: "₦"; font-size: 20px; font-weight: 600;
+.st-key-amount [data-testid="stTextInputRootElement"], .st-key-loan_amount [data-testid="stTextInputRootElement"] {display: flex; align-items: center;}
+.st-key-amount [data-testid="stTextInputRootElement"]::before,
+.st-key-loan_amount [data-testid="stTextInputRootElement"]::before {content: "₦"; font-size: 20px; font-weight: 600;
   color: #4A5568; padding-left: 16px; flex: 0 0 auto;}
-.st-key-amount input {font-size: 20px !important; font-weight: 600 !important; color: #0F1E33; padding-left: 8px !important;}
+.st-key-amount input, .st-key-loan_amount input {font-size: 20px !important; font-weight: 600 !important; color: #0F1E33; padding-left: 8px !important;}
 /* month + year stay side by side, even on phones */
-.st-key-dates [data-testid="stHorizontalBlock"] {flex-wrap: nowrap !important; gap: 10px;}
-.st-key-dates [data-testid="stColumn"] {min-width: 0 !important;}
+.st-key-dates [data-testid="stHorizontalBlock"], [class*="st-key-loan-pair"] [data-testid="stHorizontalBlock"] {flex-wrap: nowrap !important; gap: 10px;}
+.st-key-dates [data-testid="stColumn"], [class*="st-key-loan-pair"] [data-testid="stColumn"] {min-width: 0 !important;}
 .mm-hint {font-weight: 400; color: #4A5568;}
 
 /* pills: unselected white with grey border. Pick-several pills (multi) turn navy with a tick;
    pick-one pills (single) turn light blue, like the mockup's quick amounts. */
+/* pill groups always wrap onto a new line instead of scrolling sideways (narrow columns, phones) */
+[data-testid="stButtonGroup"] [role="toolbar"], [data-testid="stButtonGroup"] [role="radiogroup"] {flex-wrap: wrap !important; overflow: visible !important;}
 [data-testid="stButtonGroup"] button[data-variant="pills"] {border-radius: 999px !important; height: 40px;
   padding: 0 16px; background: #FFFFFF !important; border: 1px solid #CBD2DC !important;}
 [data-testid="stButtonGroup"] button[data-variant="pills"] p {font-size: 14px; color: #0F1E33 !important;}
@@ -330,7 +342,7 @@ a.mm-explore:hover {border-color: #CBD2DC; box-shadow: 0 2px 10px rgba(15,30,51,
   .st-key-nav-brand p {font-size: 18px !important;}
   .st-key-mm-tabs, .st-key-mm-topbar [data-testid="stElementContainer"]:has(.mm-upto) {display: none !important;}
   .st-key-mm-burger {display: flex !important;}
-  .st-key-hero-home {padding: 22px; border-radius: 16px; gap: 16px !important;}
+  [class*="st-key-hero-"] {padding: 22px; border-radius: 16px; gap: 16px !important;}
   .mm-intro {padding-top: 24px; gap: 8px;}
   .mm-eyebrow {font-size: 12px; letter-spacing: 1.4px;}
   .mm-eyebrow .phone-only {display: inline;}
