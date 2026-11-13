@@ -5,6 +5,8 @@ Rules:
 - A vintage is written once and never overwritten or edited. If the file exists, it is left alone.
 - data/forecasts/manifest.json records every vintage's SHA-256 fingerprint. validate.py checks that every
   file still matches its fingerprint and that no unexpected file has appeared, before any run saves anything.
+- Files are written with Unix line endings, and fingerprints ignore line-ending style, so a vintage has the
+  same fingerprint on Windows and on GitHub's Linux machines.
 """
 
 import hashlib
@@ -17,6 +19,7 @@ import pandas as pd
 FORECASTS = Path(__file__).resolve().parents[1] / "data" / "forecasts"
 MANIFEST = FORECASTS / "manifest.json"
 MODELS = ("inflation", "naira")
+CRLF, LF = bytes([13, 10]), bytes([10])
 
 
 def vintage_path(model, vintage):
@@ -24,7 +27,8 @@ def vintage_path(model, vintage):
 
 
 def _sha(path):
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    """Fingerprint of the file's content, with Windows line endings (CR LF) read as Unix ones (LF)."""
+    return hashlib.sha256(path.read_bytes().replace(CRLF, LF)).hexdigest()
 
 
 def load_manifest():
@@ -43,7 +47,8 @@ def save_vintage(model, vintage, table, source, note=""):
     out.insert(0, "source", source)
     out.insert(0, "vintage", vintage)
     out.insert(0, "model", model)
-    path.write_text(out.to_csv(index=False, date_format="%Y-%m-%d", lineterminator="\n"), encoding="utf-8")
+    text = out.to_csv(index=False, date_format="%Y-%m-%d", lineterminator="\n")
+    path.write_text(text, encoding="utf-8", newline="\n")  # Unix line endings on every machine, as stored in git
     manifest[path.name] = {"source": source, "note": note, "sha256": _sha(path),
                            "saved_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds")}
     MANIFEST.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")

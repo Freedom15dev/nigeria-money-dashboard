@@ -1,2 +1,3 @@
 * text=auto
 data/processed/* text eol=lf
+data/forecasts/* text eol=lf
