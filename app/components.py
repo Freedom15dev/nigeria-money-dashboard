@@ -40,8 +40,9 @@ ARTICLES = {
     "Borrowing": "https://www.linkedin.com/pulse/who-gets-borrow-nigeria-i-followed-two-borrowers-find-freedom-oboh-q6mof",
 }
 
-# Pages in the header. url=None means not built yet (shown as "soon").
-NAV = [("Home", "/"), ("My savings", "/savings"), ("Prices", None), ("The naira", None), ("Borrowing", None)]
+# Pages in the header (paths as given to st.Page in Home.py). None = not built yet, shown as "soon".
+NAV_PAGES = {"Home": "pages/home.py", "My savings": "pages/savings.py",
+             "Prices": None, "The naira": None, "Borrowing": None}
 
 # --------------------------------------------------------------------------- colours (design/)
 NAVY, BLUE, ORANGE, ORANGE_LIGHT = "#0F1E33", "#2A6FDB", "#D9822B", "#F0A65E"
@@ -121,24 +122,49 @@ h1 a, h2 a, h3 a {display: none !important;}
 .mm p {margin: 0;}
 .mm a {color: #2A6FDB;} .mm a:hover {color: #1B4FA8;}
 
-/* ---------- brand header (full width) ---------- */
-.mm-header {background: #FFFFFF; border-bottom: 1px solid #E3E6EB; margin: 0 calc(50% - 50vw);}
-.mm-header-in {max-width: 1120px; margin: 0 auto; padding: 16px 24px; display: flex; flex-wrap: wrap;
-  align-items: center; gap: 16px 32px; box-sizing: border-box;}
-.mm-brand {display: flex; align-items: center; gap: 10px; text-decoration: none !important; color: #0F1E33 !important;}
-.mm-badge234 {display: inline-flex; align-items: center; height: 34px; padding: 0 10px; border-radius: 8px;
-  background: #0F1E33; color: #FFFFFF; font-family: 'Space Grotesk', Arial, sans-serif; font-weight: 700; font-size: 14px;}
-.mm-brand-name {font-family: 'Space Grotesk', Arial, sans-serif; font-weight: 700; font-size: 20px;}
-.mm-nav {display: flex; flex-wrap: wrap; gap: 4px; flex: 1 1 auto;}
-.mm-nav a, .mm-nav span {padding: 8px 12px; border-radius: 8px; font-size: 15px; font-weight: 500;
-  color: #4A5568 !important; text-decoration: none !important;}
-.mm-nav a:hover {background: #F5F6F8;}
-.mm-nav a[aria-current="page"] {font-weight: 600; color: #0F1E33 !important; background: #EAF1FC;}
-.mm-nav span.soon {color: #9AA3B2 !important; cursor: default;}
-.mm-nav span.soon small {font-size: 11px; margin-left: 4px;}
-.mm-upto {font-size: 14px; color: #4A5568;}
+/* ---------- brand header (full width; built from st.page_link so it works inside Streamlit Cloud's frame) */
+.st-key-mm-topbar {background: #FFFFFF; border-bottom: 1px solid #E3E6EB; box-sizing: border-box;
+  width: 100vw !important; max-width: 100vw !important; margin-left: calc(50% - 50vw) !important;
+  padding: 14px max(24px, calc((100vw - 1120px) / 2 + 24px)); flex-wrap: nowrap !important; gap: 32px !important;}
+.st-key-mm-topbar [data-testid="stPageLink-NavLink"] {text-decoration: none !important; margin: 0;}
+.st-key-nav-brand [data-testid="stPageLink-NavLink"] {gap: 10px; padding: 0; background: none !important;}
+.st-key-nav-brand [data-testid="stPageLink-NavLink"]::before {content: "+234"; display: inline-flex; align-items: center;
+  height: 34px; padding: 0 10px; border-radius: 8px; background: #0F1E33; color: #FFFFFF;
+  font-family: 'Space Grotesk', Arial, sans-serif; font-weight: 700; font-size: 14px;}
+.st-key-nav-brand p {font-family: 'Space Grotesk', Arial, sans-serif !important; font-weight: 700 !important;
+  font-size: 20px !important; color: #0F1E33 !important; white-space: nowrap;}
+.st-key-mm-tabs {flex: 1 1 auto !important; gap: 4px !important;}
+[class*="st-key-tab-"] [data-testid="stPageLink-NavLink"] {padding: 8px 12px; border-radius: 8px; background: transparent;}
+[class*="st-key-tab-"] [data-testid="stPageLink-NavLink"]:hover {background: #F5F6F8;}
+[class*="st-key-tab-"] p {font-size: 15px !important; font-weight: 500 !important; color: #4A5568 !important; white-space: nowrap;}
+[class*="st-key-tab-"][class*="-active"] [data-testid="stPageLink-NavLink"] {background: #EAF1FC !important;}
+[class*="st-key-tab-"][class*="-active"] p {font-weight: 600 !important; color: #0F1E33 !important;}
+.mm-soon {display: inline-block; padding: 8px 12px; font-size: 15px; color: #9AA3B2; cursor: default; white-space: nowrap;}
+.mm-soon small {font-size: 11px; margin-left: 4px;}
+.mm-upto {font-size: 14px; color: #4A5568; white-space: nowrap;}
 .mm-upto b {color: #0F1E33;}
-.mm-menu {display: none;}
+.st-key-mm-burger {display: none !important;}
+.st-key-mm-burger button {width: 44px; height: 44px; min-height: 44px; padding: 0; border: 1px solid #E3E6EB;
+  border-radius: 10px; background: #FFFFFF; justify-content: center;}
+.st-key-mm-burger button p {font-size: 22px; line-height: 1;}
+.st-key-mm-burger button [data-testid="stIconMaterial"] {display: none;}
+[data-testid="stPopoverBody"] [data-testid="stPageLink-NavLink"] p {font-size: 16px; font-weight: 500;}
+
+/* ---------- Home hero and Explore card that hold a st.page_link ---------- */
+.st-key-hero-home {background: #0F1E33; border-radius: 20px; padding: 32px 36px; gap: 24px 40px !important;}
+.st-key-hero-home .mm-hero.bare {background: none; padding: 0; border-radius: 0;}
+.st-key-hero-home > [data-testid="stElementContainer"]:has(.mm-hero) {flex: 1 1 420px !important;}
+.st-key-cta [data-testid="stPageLink-NavLink"] {height: 52px; padding: 0 22px; border-radius: 12px;
+  background: #F0A65E !important; text-decoration: none !important;}
+.st-key-cta [data-testid="stPageLink-NavLink"]:hover {background: #F4B97A !important;}
+.st-key-cta p {color: #0F1E33 !important; font-weight: 700 !important; font-size: 16px !important; white-space: nowrap;}
+.st-key-explore {gap: 16px !important;}
+.st-key-explore > * {flex: 1 1 240px !important; min-width: 0 !important;}
+.st-key-explore .mm-card {height: 100%;}
+.st-key-explore-savings {background: #FFFFFF; border: 1px solid #E3E6EB; border-top: 4px solid #2A6FDB;
+  border-radius: 14px; padding: 22px; gap: 8px !important;}
+.st-key-explore-savings [data-testid="stPageLink-NavLink"] {padding: 0; background: none !important;}
+.st-key-explore-savings [data-testid="stPageLink-NavLink"] p {color: #2A6FDB !important; font-weight: 600 !important; font-size: 14px;}
 
 /* ---------- page intro ---------- */
 .mm-intro {display: flex; flex-direction: column; gap: 12px; max-width: 800px; padding-top: 48px;}
@@ -276,18 +302,12 @@ a.mm-explore:hover {border-color: #CBD2DC; box-shadow: 0 2px 10px rgba(15,30,51,
 /* ---------- phones ---------- */
 @media (max-width: 640px) {
   [data-testid="stMainBlockContainer"], .block-container {padding: 0 16px;}
-  .mm-header-in {padding: 12px 16px; justify-content: space-between;}
-  .mm-badge234 {height: 30px; padding: 0 8px; font-size: 13px;}
-  .mm-brand-name {font-size: 18px;}
-  .mm-header .mm-nav, .mm-upto {display: none;}
-  .mm-menu {display: block; position: relative;}
-  .mm-menu summary {list-style: none; width: 44px; height: 44px; border: 1px solid #E3E6EB; border-radius: 10px;
-    display: flex; align-items: center; justify-content: center; cursor: pointer; background: #FFFFFF;}
-  .mm-menu summary::-webkit-details-marker {display: none;}
-  .mm-burger {font-size: 22px; line-height: 1; color: #0F1E33;}
-  .mm-menu .mm-nav {display: flex; flex-direction: column; position: absolute; right: 0; top: 52px; z-index: 1000;
-    background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 12px; padding: 8px; min-width: 200px;
-    box-shadow: 0 8px 24px rgba(15,30,51,0.12);}
+  .st-key-mm-topbar {padding: 12px 16px; justify-content: space-between; gap: 12px !important;}
+  .st-key-nav-brand [data-testid="stPageLink-NavLink"]::before {height: 30px; padding: 0 8px; font-size: 13px;}
+  .st-key-nav-brand p {font-size: 18px !important;}
+  .st-key-mm-tabs, .st-key-mm-topbar [data-testid="stElementContainer"]:has(.mm-upto) {display: none !important;}
+  .st-key-mm-burger {display: flex !important;}
+  .st-key-hero-home {padding: 22px; border-radius: 16px; gap: 16px !important;}
   .mm-intro {padding-top: 24px; gap: 8px;}
   .mm-eyebrow {font-size: 12px; letter-spacing: 1.4px;}
   .mm-eyebrow .phone-only {display: inline;}
@@ -330,31 +350,37 @@ def inject_css():
 
 
 # --------------------------------------------------------------------------- page pieces
+def _slug(name):
+    return name.lower().replace(" ", "-")
+
+
 def brand_header(active, meta):
     """The white top bar: +234 badge and name, page tabs, 'Data up to' on the right.
 
-    On phones the tabs fold into a menu button (pure HTML <details>, no JavaScript).
+    Links between pages are st.page_link, not HTML <a> tags: on Streamlit Cloud the app runs
+    inside a frame, and a plain link would open the whole site inside that frame. On phones
+    the tabs fold into a ☰ menu (st.popover).
     """
-    links = []
-    for name, url in NAV:
-        if url is None:
-            links.append(f'<span class="soon" title="Coming soon">{e(name)}<small>soon</small></span>')
-        elif name == active:
-            links.append(f'<a href="{url}" aria-current="page">{e(name)}</a>')
-        else:
-            links.append(f'<a href="{url}">{e(name)}</a>')
-    nav = "".join(links)
-    menu_icon = '<span class="mm-burger" aria-hidden="true">☰</span>'  # st.html strips inline SVG
-    st.html(
-        f'<header class="mm mm-header"><div class="mm-header-in">'
-        f'<a class="mm-brand" href="/" aria-label="{e(APP_NAME)}, home">'
-        f'<span class="mm-badge234">+234</span><span class="mm-brand-name">Money Matters</span></a>'
-        f'<nav class="mm-nav" aria-label="Main">{nav}</nav>'
-        f'<p class="mm-upto">Data up to <b>{e(meta["latest_month_label"])}</b></p>'
-        f'<details class="mm-menu"><summary aria-label="Open menu">{menu_icon}</summary>'
-        f'<nav class="mm-nav" aria-label="Main (phone)">{nav}</nav></details>'
-        f'</div></header>'
-    )
+    with st.container(key="mm-topbar", horizontal=True, vertical_alignment="center", gap="medium"):
+        with st.container(key="nav-brand", width="content"):
+            st.page_link(NAV_PAGES["Home"], label="Money Matters", help=None)
+        with st.container(key="mm-tabs", horizontal=True, vertical_alignment="center", gap=None):
+            for name, page in NAV_PAGES.items():
+                if page is None:
+                    st.html(f'<span class="mm mm-soon" title="Coming soon">{e(name)}<small>soon</small></span>',
+                            width="content")
+                else:
+                    state = "-active" if name == active else ""
+                    with st.container(key=f"tab-{_slug(name)}{state}", width="content"):
+                        st.page_link(page, label=name)
+        st.html(f'<p class="mm mm-upto">Data up to <b>{e(meta["latest_month_label"])}</b></p>', width="content")
+        with st.container(key="mm-burger", width="content"):
+            with st.popover("☰", help="Menu"):
+                for name, page in NAV_PAGES.items():
+                    if page is None:
+                        st.html(f'<span class="mm mm-soon">{e(name)}<small>soon</small></span>')
+                    else:
+                        st.page_link(page, label=name)
 
 
 def page_intro(eyebrow, title, lead, meta):

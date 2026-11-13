@@ -20,14 +20,17 @@ page_intro(SUPPORTING_LINE.rstrip("."), TAGLINE,
 # ----------------------------------------------------------------------------- the sentence (navy hero)
 real = now["real_savings_rate"]
 direction = "losing" if real < 0 else "gaining"
-st.html(
-    f'<section class="mm mm-hero" aria-label="This month in one sentence"><div class="main">'
-    f'<p class="kicker">Your money, this month</p>'
-    f'<p class="statement">Prices are rising <b>{pct(now["inflation"])}</b> a year. A savings account pays '
-    f'<b>{pct(now["savingsDeposit"])}</b>. Money in a savings account is {direction} about '
-    f'<span class="warm">{abs(real):.1f}%</span> of its value each year.</p></div>'
-    f'<a class="mm-cta" href="/savings">Check your savings <span aria-hidden="true">→</span></a></section>'
-)
+# The navy card is a Streamlit container so the button can be a real st.page_link (see brand_header).
+with st.container(key="hero-home", horizontal=True, vertical_alignment="center"):
+    st.html(
+        f'<section class="mm mm-hero bare" aria-label="This month in one sentence"><div class="main">'
+        f'<p class="kicker">Your money, this month</p>'
+        f'<p class="statement">Prices are rising <b>{pct(now["inflation"])}</b> a year. A savings account pays '
+        f'<b>{pct(now["savingsDeposit"])}</b>. Money in a savings account is {direction} about '
+        f'<span class="warm">{abs(real):.1f}%</span> of its value each year.</p></div></section>'
+    )
+    with st.container(key="cta", width="content"):
+        st.page_link("pages/savings.py", label="Check your savings →")
 
 
 # ----------------------------------------------------------------------------- key numbers
@@ -99,19 +102,22 @@ with st.expander("What these terms mean"):
 
 # ----------------------------------------------------------------------------- explore
 section_head("Explore")
-st.html(
-    '<div class="mm mm-cards">'
-    '<a class="mm-card mm-explore" href="/savings"><span class="t">My savings</span>'
-    '<span class="d">What is money you saved in a past year worth today?</span></a>'
-    '<div class="mm-card mm-explore"><span class="t">Prices</span>'
-    '<span class="d">Inflation since 2003, and where it may head next.</span><span class="soon">Coming soon</span></div>'
-    '<div class="mm-card mm-explore"><span class="t">The naira</span>'
-    '<span class="d">20 years of the dollar rate, and the outlook to 2030.</span><span class="soon">Coming soon</span></div>'
-    f'<a class="mm-card mm-explore warm" href="{LOAN_CALCULATOR_URL}" target="_blank" rel="noopener">'
-    '<span class="t">Borrowing</span><span class="d">Who pays what to borrow. The page is coming soon; '
-    'the loan calculator works now: <b>work out your own loan →</b></span></a>'
-    '</div>'
-)
+with st.container(key="explore", horizontal=True):
+    with st.container(key="explore-savings"):
+        st.html('<div class="mm" style="display:flex;flex-direction:column;gap:8px">'
+                '<span style="font-size:18px;font-weight:700">My savings</span>'
+                '<span style="font-size:14px;line-height:1.5;color:#4A5568">What is money you saved in a past '
+                'year worth today?</span></div>')
+        st.page_link("pages/savings.py", label="Work out my savings →")
+    st.html('<div class="mm mm-card mm-explore"><span class="t">Prices</span>'
+            '<span class="d">Inflation since 2003, and where it may head next.</span>'
+            '<span class="soon">Coming soon</span></div>')
+    st.html('<div class="mm mm-card mm-explore"><span class="t">The naira</span>'
+            '<span class="d">20 years of the dollar rate, and the outlook to 2030.</span>'
+            '<span class="soon">Coming soon</span></div>')
+    st.html(f'<a class="mm mm-card mm-explore warm" href="{LOAN_CALCULATOR_URL}" target="_blank" rel="noopener">'
+            '<span class="t">Borrowing</span><span class="d">Who pays what to borrow. The page is coming soon; '
+            'the loan calculator works now: <b>work out your own loan →</b></span></a>')
 
 with st.expander("About Money Matters"):
     st.write(DESCRIPTION)
