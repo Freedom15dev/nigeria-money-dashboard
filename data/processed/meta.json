@@ -1,0 +1,49 @@
+{
+  "latest_month": "2026-09-01",
+  "latest_month_label": "September 2026",
+  "built_at_utc": "2026-11-13T10:28:05+00:00",
+  "pulled_at_utc": {
+    "inflation": "2026-11-13T10:26:29+00:00",
+    "money_market": "2026-11-13T10:26:29+00:00",
+    "money_credit": "2026-11-13T10:26:29+00:00",
+    "exchange_rates": "2026-11-13T10:26:29+00:00",
+    "crude": "2026-11-13T10:26:29+00:00"
+  },
+  "rows": {
+    "panel": 285
+  },
+  "panel_start": "2003-01-01",
+  "run_log": [
+    "June 2025 fix: June repeated May; interpolated headline to 25.50%.",
+    "2025 inflation: using the CBN feed's revised figures as published (Jan 2026 NBS revision).",
+    "Policy rate: 11 zero MPR months replaced by the MRR.",
+    "T-bill zeros treated as missing: ['2017-12', '2018-12'].",
+    "Exchange rate: daily -> monthly average; 6 duplicate days averaged; one-day typos removed: ['2003-12-09 (₦1,376.80 vs ₦136.80 nearby)', '2007-08-28 (₦74.52 vs ₦124.45 nearby)', '2008-08-01 (₦66.09 vs ₦116.09 nearby)'].",
+    "Credit to government below zero in 93 months: kept as published (net lender).",
+    "Credit gaps filled for charts only: ['2026-03'].",
+    "Known difference: usd_ngn 2007-08: nigeria-savings-vs-inflation had 122.6355, now 124.9267 (method: this month had a one-day typo in the CBN feed, which naira-scenarios (and this dashboard) drops; this earlier project kept it)",
+    "Known difference: usd_ngn 2008-08: nigeria-savings-vs-inflation had 113.6952, now 116.0755 (method: this month had a one-day typo in the CBN feed, which naira-scenarios (and this dashboard) drops; this earlier project kept it)",
+    "Known difference: usd_ngn 2022-03: nigeria-savings-vs-inflation had 415.8309, now 415.8316 (method: this month has a day listed twice with two different rates; naira-scenarios (and this dashboard) averages the two; this earlier project kept only one)",
+    "Known difference: usd_ngn 2023-12: nigeria-savings-vs-inflation had 901.6819, now 901.5570 (method: this month has a day listed twice with two different rates; naira-scenarios (and this dashboard) averages the two; this earlier project kept only one)",
+    "Known difference: usd_ngn 2024-02: nigeria-savings-vs-inflation had 1,508.0555, now 1,506.8361 (method: this month has a day listed twice with two different rates; naira-scenarios (and this dashboard) averages the two; this earlier project kept only one)",
+    "Known difference: usd_ngn 2024-07: nigeria-savings-vs-inflation had 1,559.7238, now 1,559.6515 (method: this month has a day listed twice with two different rates; naira-scenarios (and this dashboard) averages the two; this earlier project kept only one)",
+    "Known difference: usd_ngn 2003-12: nigeria-inflation-forecast had 195.7700, now 136.7195 (method: this month had a one-day typo in the CBN feed, which naira-scenarios (and this dashboard) drops; this earlier project kept it)",
+    "Known difference: usd_ngn 2007-08: nigeria-inflation-forecast had 122.6400, now 124.9267 (method: this month had a one-day typo in the CBN feed, which naira-scenarios (and this dashboard) drops; this earlier project kept it)",
+    "Known difference: usd_ngn 2008-08: nigeria-inflation-forecast had 113.7000, now 116.0755 (method: this month had a one-day typo in the CBN feed, which naira-scenarios (and this dashboard) drops; this earlier project kept it)",
+    "Known difference: usd_ngn 2023-12: nigeria-inflation-forecast had 898.9000, now 901.5570 (method: this month has a day listed twice with two different rates; naira-scenarios (and this dashboard) averages the two; this earlier project kept only one)",
+    "Known difference: usd_ngn 2024-02: nigeria-inflation-forecast had 1,504.8200, now 1,506.8361 (method: this month has a day listed twice with two different rates; naira-scenarios (and this dashboard) averages the two; this earlier project kept only one)",
+    "Known difference: usd_ngn 2024-07: nigeria-inflation-forecast had 1,557.5700, now 1,559.6515 (method: this month has a day listed twice with two different rates; naira-scenarios (and this dashboard) averages the two; this earlier project kept only one)",
+    "Reference snapshot: every value up to Sep 2026 matches the four earlier projects, apart from the 12 known differences listed above.",
+    "Savings article reproduced: all five options match to within ₦2."
+  ],
+  "trap_notes": {
+    "revised_2025_inflation": "In January 2026 the NBS revised its 2025 inflation figures, raising each month by about 3 points (the January 2025 rebasing had used the wrong base period). The CBN feed holds the revised figures and we use them as they are, so 2025 inflation here is higher than the numbers first reported in the news.",
+    "june_2025_repeat": "In the CBN feed, June 2025 inflation is an exact copy of May 2025. We replace June with the point halfway between May and July.",
+    "rebasing_2025": "In January 2025 the NBS rebased the price index (new basket, new base year). That is part of why inflation fell sharply that month. Our price index is built from the yearly rates, so it runs straight across the break without restarting.",
+    "policy_rate": "The Monetary Policy Rate (MPR) only started in December 2006. Before that the CBN's main rate was the Minimum Rediscount Rate (MRR), and the feed shows the MPR as 0. We use one 'policy rate' column: the MRR before December 2006 and the MPR after.",
+    "tbill_zeros": "The Treasury bill rate shows 0.00% in December 2017 and December 2018, between months of 11-13%. A 0% rate never happened, so we treat both as missing. For the savings calculator we carry the previous month's rate forward for those two months.",
+    "credit_march_2026": "Credit figures for March 2026 are missing from the CBN feed. Charts draw a straight line between February and April; no calculation uses the filled value.",
+    "credit_to_government_negative": "Credit to government is below zero in many months up to 2014. That is real, not an error: the government kept more money in the banks than it borrowed, so on balance it was a lender.",
+    "exchange_rates": "The CBN publishes the official rate daily. We average each month's days to get one monthly rate and record how many days went into each average. A few days appear twice; we average the two. Three days are clear typing errors (for example ₦1,376.80 on 9 December 2003, when the days around it were about ₦136.80); a day more than 25% away from the 11 trading days around it is dropped. This is the official rate only, not the parallel (street) market rate."
+  }
+}

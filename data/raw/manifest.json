@@ -1,0 +1,32 @@
+{
+  "inflation": {
+    "url": "https://www.cbn.gov.ng/api/GetAllInflationRates",
+    "pulled_at_utc": "2026-11-13T10:26:29+00:00",
+    "records": 285,
+    "sha256": "a2fc02913a4d99a4e54fb5dbc06486db0e4c59d29f6c02d6305f682f92418bb1"
+  },
+  "money_market": {
+    "url": "https://www.cbn.gov.ng/api/GetAllMoneyMarketIndicators",
+    "pulled_at_utc": "2026-11-13T10:26:29+00:00",
+    "records": 249,
+    "sha256": "bdb8412584d6bafba6534bbe556f2ac840029d184910c330ae569df5e9260f35"
+  },
+  "money_credit": {
+    "url": "https://www.cbn.gov.ng/api/GetAllMoneyAndCreditStats",
+    "pulled_at_utc": "2026-11-13T10:26:29+00:00",
+    "records": 437,
+    "sha256": "abf2ed013b22a7a0ce15c4565ee9a29da93157f21ac995c2efed13c124402f72"
+  },
+  "exchange_rates": {
+    "url": "https://www.cbn.gov.ng/api/GetAllExchangeRates",
+    "pulled_at_utc": "2026-11-13T10:26:29+00:00",
+    "records": 62644,
+    "sha256": "b4bda49f8080920ddf652872220b1efd7da92ea2bbccc09e1a6db424a8a948a6"
+  },
+  "crude": {
+    "url": "https://www.cbn.gov.ng/api/GetAllDailyCrude",
+    "pulled_at_utc": "2026-11-13T10:26:29+00:00",
+    "records": 3993,
+    "sha256": "6bce3d55636b39702ffdff72e164b495ec8bf43acfacf4a3df3c63a10cb203ea"
+  }
+}
