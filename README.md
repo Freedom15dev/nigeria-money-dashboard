@@ -28,5 +28,7 @@ streamlit run app/Home.py       # open the app at http://localhost:8501
 ```
 
 `python pipeline/run_all.py --offline` rebuilds from the raw files already saved, without downloading.
+If the data hasn't changed, nothing is written (so a quiet month makes no commit); add `--rebuild` to write every
+output anyway, e.g. after changing the code.
 
 Educational, not financial advice. Data: Central Bank of Nigeria. Built by Freedom Oboh with Python and Streamlit.

@@ -52,7 +52,7 @@ def write_atomically(path, text):
     os.replace(tmp, path)
 
 
-def main(offline=False):
+def main(offline=False, rebuild=False):
     print("1. Fetch")
     if offline:
         print("  --offline: using the raw files already in data/raw/")
@@ -144,19 +144,28 @@ def main(offline=False):
     outputs[PROCESSED / "forecast_vintages.csv"] = csv(track.all_vintages())
     meta["rows"]["forecast_scores"] = len(scores)
 
+    # Decide "changed" from the DATA, not from the model files: the models are recomputed from the data,
+    # and their last decimal places differ slightly between Windows and GitHub's Linux machines. So if the
+    # panel is unchanged, no new vintage was saved and every output exists, write nothing: a quiet month
+    # makes no commit. (--rebuild writes everything anyway, e.g. after changing the code.)
+    new_vintage = any(" saved (" in line and "already" not in line for line in meta["run_log"][-2:])
+    panel_changed = not PANEL_PATH.exists() or PANEL_PATH.read_text(encoding="utf-8") != outputs[PANEL_PATH]
+    missing = [p.name for p in outputs if not p.exists()] + ([] if META_PATH.exists() else [META_PATH.name])
+    if not (panel_changed or new_vintage or missing or rebuild):
+        print("  No change in the data since the last run: nothing written.")
+        return
     changed = [p.name for p, text in outputs.items()
                if not p.exists() or p.read_text(encoding="utf-8") != text]
     for path, text in outputs.items():
         write_atomically(path, text)
-    # Keep meta.json unchanged when nothing changed, so a quiet month makes no commit.
-    if changed or not META_PATH.exists():
-        write_atomically(META_PATH, json.dumps(meta, indent=2, ensure_ascii=False) + "\n")
-        print(f"  Saved {', '.join(changed)} and {META_PATH.name}: data up to {meta['latest_month_label']}.")
-    else:
-        print("  No change in the data since the last run.")
+    write_atomically(META_PATH, json.dumps(meta, indent=2, ensure_ascii=False) + "\n")
+    print(f"  Saved {', '.join(changed) or 'no changed files'} and {META_PATH.name}: "
+          f"data up to {meta['latest_month_label']}.")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--offline", action="store_true", help="rebuild from data/raw/ without downloading")
-    main(parser.parse_args().offline)
+    parser.add_argument("--rebuild", action="store_true", help="write every output even if the data is unchanged")
+    args = parser.parse_args()
+    main(args.offline, args.rebuild)
