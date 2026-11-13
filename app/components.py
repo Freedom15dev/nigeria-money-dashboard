@@ -31,7 +31,8 @@ DESCRIPTION = (
 )
 LOAN_CALCULATOR_URL = "https://naija-loan-cost.streamlit.app/"
 GITHUB_URL = "https://github.com/Freedom15dev/nigeria-money-dashboard"
-LINKEDIN_URL = None  # profile link still to come; the footer shows the articles meanwhile
+LINKEDIN_URL = "https://www.linkedin.com/in/freedomoboh"
+PORTFOLIO_URL = "https://oboh.com.ng/"
 ARTICLES = {
     "Inflation": "https://www.linkedin.com/pulse/i-analysed-23-years-nigerian-inflation-data-heres-what-freedom-oboh-vumkf",
     "Savings": "https://www.linkedin.com/pulse/i-followed-100000-20-years-heres-what-happened-nigerian-freedom-oboh-o090f",
@@ -398,7 +399,8 @@ def footer():
     st.html(
         f'<footer class="mm mm-footer"><div class="mm-footer-in">'
         f'<p>Educational, not financial advice. Data: Central Bank of Nigeria (and US BLS via FRED for the naira page).</p>'
-        f'<p>Built by Freedom Oboh with Python and Streamlit · '
+        f'<p>Built by <a href="{PORTFOLIO_URL}" target="_blank" rel="noopener">Freedom Oboh</a> '
+        f'with Python and Streamlit · '
         f'<a href="{GITHUB_URL}" target="_blank" rel="noopener">GitHub</a>{linkedin} · Articles: {articles}</p>'
         f'</div></footer>'
     )
