@@ -31,7 +31,7 @@ with st.container(key="hero-home", horizontal=True, vertical_alignment="center")
         f'<span class="warm">{abs(real):.1f}%</span> of its value each year.</p></div></section>'
     )
     with st.container(key="cta", width="content"):
-        st.page_link("pages/savings.py", label="Check your savings →")
+        st.page_link("views/savings.py", label="Check your savings →")
 
 
 # ----------------------------------------------------------------------------- key numbers
@@ -108,10 +108,10 @@ with st.expander("What these terms mean"):
 # ----------------------------------------------------------------------------- explore
 section_head("Explore")
 EXPLORE = [  # (key, title, description, page, link text)
-    ("savings", "My savings", "What is money you saved in a past year worth today?", "pages/savings.py",
+    ("savings", "My savings", "What is money you saved in a past year worth today?", "views/savings.py",
      "Work out my savings →"),
-    ("prices", "Prices", "Inflation since 2003, and where it may head next.", "pages/prices.py", "See prices →"),
-    ("naira", "The naira", "20 years of the dollar rate, and the outlook to 2030.", "pages/naira.py",
+    ("prices", "Prices", "Inflation since 2003, and where it may head next.", "views/prices.py", "See prices →"),
+    ("naira", "The naira", "20 years of the dollar rate, and the outlook to 2030.", "views/naira.py",
      "See the naira →"),
 ]
 with st.container(key="explore", horizontal=True):

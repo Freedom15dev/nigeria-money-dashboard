@@ -1,19 +1,21 @@
 {
   "latest_month": "2026-09-01",
   "latest_month_label": "September 2026",
-  "built_at_utc": "2026-11-13T12:57:35+00:00",
+  "built_at_utc": "2026-11-13T13:30:40+00:00",
   "pulled_at_utc": {
-    "inflation": "2026-11-13T10:26:29+00:00",
-    "money_market": "2026-11-13T10:26:29+00:00",
-    "money_credit": "2026-11-13T10:26:29+00:00",
-    "exchange_rates": "2026-11-13T10:26:29+00:00",
-    "crude": "2026-11-13T10:26:29+00:00"
+    "inflation": "2026-11-13T13:08:26+00:00",
+    "money_market": "2026-11-13T13:08:26+00:00",
+    "money_credit": "2026-11-13T13:08:26+00:00",
+    "exchange_rates": "2026-11-13T13:08:26+00:00",
+    "crude": "2026-11-13T13:08:26+00:00",
+    "us_cpi": "2026-11-13T13:08:26+00:00"
   },
   "rows": {
     "panel": 285,
     "forecast": 24,
     "naira_outlook": 48,
-    "naira_scenarios": 192
+    "naira_scenarios": 192,
+    "forecast_scores": 0
   },
   "panel_start": "2003-01-01",
   "run_log": [
@@ -40,7 +42,10 @@
     "Known difference: usd_ngn 2024-07: nigeria-inflation-forecast had 1,557.5700, now 1,559.6515 (method: this month has a day listed twice with two different rates; naira-scenarios (and this dashboard) averages the two; this earlier project kept only one)",
     "Reference snapshot: every value up to Sep 2026 matches the four earlier projects, apart from the 12 known differences listed above.",
     "Savings article reproduced: all five options match to within ₦2.",
-    "Models reproduce the articles on data to Sep 2026: all 43 published numbers match (inflation to 0.1 point, naira to the nearest ₦10)."
+    "Models reproduce the articles on data to Sep 2026: all 43 published numbers match (inflation to 0.1 point, naira to the nearest ₦10).",
+    "Forecast vintages: all 2 saved files unchanged.",
+    "Vintage inflation_2026-09.csv already saved (published); left unchanged.",
+    "Vintage naira_2026-09.csv already saved (published); left unchanged."
   ],
   "trap_notes": {
     "revised_2025_inflation": "In January 2026 the NBS revised its 2025 inflation figures, raising each month by about 3 points (the January 2025 rebasing had used the wrong base period). The CBN feed holds the revised figures and we use them as they are, so 2025 inflation here is higher than the numbers first reported in the news.",

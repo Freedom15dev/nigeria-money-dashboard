@@ -1,0 +1,14 @@
+{
+  "inflation_2026-09.csv": {
+    "source": "published",
+    "note": "nigeria-inflation-forecast, notebook section 9.1 (as published)",
+    "sha256": "a1778c8a44dcfe89c7417f9b24a2d894d06f3a3ffb23b6b16eebfd7791d946fb",
+    "saved_at_utc": "2026-11-13T13:26:15+00:00"
+  },
+  "naira_2026-09.csv": {
+    "source": "published",
+    "note": "naira-scenarios, notebook sections 9c and 9e (as published)",
+    "sha256": "edeabe96ee02178b383ec42d995dcf15ef9e23ff0b47c86fb45b337ad31b7f79",
+    "saved_at_utc": "2026-11-13T13:26:15+00:00"
+  }
+}

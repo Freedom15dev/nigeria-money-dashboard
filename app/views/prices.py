@@ -7,7 +7,7 @@ import streamlit as st
 
 from components import (BLUE, GREY, HELP, NAVY, ORANGE, brand_header, e, footer, info_box,
                         kpi_card, change_text, legend, load_csv, load_meta, load_panel, naira, page_intro, pct,
-                        section_head, show_chart, style_figure, under_the_hood)
+                        forecast_tracker, section_head, show_chart, style_figure, under_the_hood)
 
 panel = load_panel()
 meta = load_meta()
@@ -155,6 +155,14 @@ with st.container(key="panel-forecast"):
             ("80% range", "#A9C5F0" if fc_label == "Headline" else "#F3C9A0", False),
             ("If the naira's trend continues", NAVY, True)])
     st.caption(f"Forecast made with data up to {latest:%B %Y}. {HELP['range']}")
+
+# ----------------------------------------------------------------------------- forecast tracker
+section_head("How are the forecasts doing?", "Old forecasts are kept exactly as made")
+st.session_state.setdefault("track_measure", "Headline")
+track_label = st.pills("Check the forecast for", ["Headline", "Food"], key="track_measure",
+                       label_visibility="collapsed") or "Headline"
+track_col, track_colour, _ = MEASURES[track_label]
+forecast_tracker("inflation", track_label.lower(), by_month[track_col], "points", track_colour, "track-infl")
 
 # ----------------------------------------------------------------------------- what this means
 h_now, h_then, f_now = now["inflation"], then["inflation"], now["food_inflation"]

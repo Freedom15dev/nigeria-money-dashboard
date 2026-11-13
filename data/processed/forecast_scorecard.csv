@@ -1,0 +1,4 @@
+model,vintage,source,series,forecast_months,checked,inside80,above80,below80,checked50,inside50,mean_abs_error,mean_error,mean_abs_error_pct,mean_abs_naive_error,last_checked,next_check
+inflation,2026-09,published,food,12,0,0,0,0,0,0,,,,,,2026-10-01
+inflation,2026-09,published,headline,12,0,0,0,0,0,0,,,,,,2026-10-01
+naira,2026-09,published,outlook,3,0,0,0,0,0,0,,,,,,2027-09-01

@@ -23,7 +23,9 @@ import build  # noqa: E402
 import clean  # noqa: E402
 import fetch  # noqa: E402
 import models  # noqa: E402
+import track  # noqa: E402
 import validate  # noqa: E402
+import vintages  # noqa: E402
 
 PROCESSED = HERE.parent / "data" / "processed"
 META_PATH = PROCESSED / "meta.json"
@@ -78,8 +80,9 @@ def main(offline=False):
     previous_meta = json.loads(META_PATH.read_text(encoding="utf-8")) if META_PATH.exists() else {}
     errors, vlog = validate.validate(panel, parsed, latest, previous_meta)
     e2, l2 = validate.check_models(reproduction, forecast, outlook)
-    errors += e2
-    vlog += l2
+    e3, l3 = validate.check_vintages()
+    errors += e2 + e3
+    vlog += l2 + l3
     for line in vlog:
         print(f"  {line}")
     if errors:
@@ -114,6 +117,24 @@ def main(offline=False):
         PROCESSED / "naira_scenarios.csv": csv(scenarios),
         PROCESSED / "reproduction.csv": reproduction.to_csv(index=False, lineterminator="\n"),
     }
+    # Freeze this month's forecasts (new file only; an existing vintage is never touched), then score
+    # every vintage against the actual figures that have arrived since.
+    vintage = f"{latest:%Y-%m}"
+    infl_v = forecast[["measure", "month", "forecast", "low80", "high80", "low50", "high50",
+                       "naira_scenario", "naive"]].round(6)
+    naira_v = pd.concat([outlook.drop(columns=["model_high80"]).assign(series="outlook"),
+                         scenarios.rename(columns={"scenario": "series"})], ignore_index=True)
+    naira_v = naira_v[["series", "month", "low80", "low50", "median", "high50", "high80"]].round(6)
+    for line in [vintages.save_vintage("inflation", vintage, infl_v, "pipeline", "run_all.py"),
+                 vintages.save_vintage("naira", vintage, naira_v, "pipeline", "run_all.py")]:
+        print(f"  {line}")
+        meta["run_log"].append(line)
+    scores, scorecard = track.track(panel)
+    outputs[PROCESSED / "forecast_scores.csv"] = csv(scores)
+    outputs[PROCESSED / "forecast_scorecard.csv"] = csv(scorecard)
+    outputs[PROCESSED / "forecast_vintages.csv"] = csv(track.all_vintages())
+    meta["rows"]["forecast_scores"] = len(scores)
+
     changed = [p.name for p, text in outputs.items()
                if not p.exists() or p.read_text(encoding="utf-8") != text]
     for path, text in outputs.items():

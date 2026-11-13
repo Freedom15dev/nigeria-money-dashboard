@@ -153,7 +153,7 @@ naija-money-dashboard/
 ├── README.md
 ├── app/
 │   ├── Home.py                 # entry point (st.navigation)
-│   ├── pages/                  # savings.py, prices.py, naira.py, borrowing.py
+│   ├── views/                  # home.py, savings.py, prices.py, naira.py, borrowing.py (not "pages/": see Home.py)
 │   └── components.py           # shared KPI cards, chart style, footer, "data up to" label
 ├── pipeline/
 │   ├── fetch.py                # pull every source, save raw with the pull date

@@ -6,7 +6,8 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from components import (BLUE, GREY, HELP, NAVY, ORANGE, brand_header, e, footer, info_box, legend, load_csv,
+from components import (BLUE, GREY, HELP, NAVY, ORANGE, brand_header, e, footer, forecast_tracker, info_box,
+                        legend, load_csv,
                         load_meta, load_panel, naira, naira_log_axis, page_intro, section_head, show_chart, style_figure,
                         under_the_hood)
 
@@ -23,7 +24,8 @@ today, then = fx[latest], fx[year_ago]
 JUMP = 0.05  # a jump month: the naira lost more than 5% in one month (naira-scenarios, Phase 4)
 PERIODS = {"Since 2003": None, "Since 2016": 2016, "Last 5 years": -5, "Last 2 years": -2}
 SCENARIO_NAMES = list(notes["scenarios"])
-KEY_MONTHS = [latest + pd.DateOffset(months=m) for m in (12, 24, 48)]
+# 1, 2 and 4 years after the last month of data the outlook was made with (Sep 2027/2028/2030 for Sep 2026 data)
+KEY_MONTHS = [outlook["month"].min() + pd.DateOffset(months=m - 1) for m in (12, 24, 48)]
 
 
 def ten(x):
@@ -182,6 +184,10 @@ with st.container(key="panel-scenarios"):
     legend([("Selected story: 80% range", ORANGE, False), ("Other stories", "#A9C5F0", False),
             ("Overall 80% range (adjusted)", "#DCE6F6", False), (f"Today ({naira(today)})", GREY, True)])
     st.caption("Story ranges are not adjusted for past misses; the shaded band is the overall, adjusted range.")
+
+# ----------------------------------------------------------------------------- forecast tracker
+section_head("How are the forecasts doing?", "Old forecasts are kept exactly as made")
+forecast_tracker("naira", "outlook", fx, "naira", NAVY, "track-naira", history_months=24)
 
 # ----------------------------------------------------------------------------- what this means
 k_last = by_month.loc[KEY_MONTHS[-1]]

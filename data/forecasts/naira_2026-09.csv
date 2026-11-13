@@ -1,0 +1,8 @@
+model,vintage,source,series,month,low80,low50,median,high50,high80
+naira,2026-09,published,outlook,2027-09-01,1130,1330,1400,1670,2030
+naira,2026-09,published,outlook,2028-09-01,1090,1390,1530,2310,3390
+naira,2026-09,published,outlook,2030-09-01,1090,1580,1880,4070,6870
+naira,2026-09,published,Stable reforms,2030-09-01,1230,,1500,,2010
+naira,2026-09,published,History repeats,2030-09-01,1390,,1880,,3000
+naira,2026-09,published,Oil shock,2030-09-01,2090,,2820,,4500
+naira,2026-09,published,Policy reversal,2030-09-01,2060,,2430,,3440

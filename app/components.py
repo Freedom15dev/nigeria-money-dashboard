@@ -6,6 +6,7 @@ The app only ever reads data/processed/. It never calls the CBN.
 
 import html
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -13,7 +14,8 @@ import pandas as pd
 import streamlit as st
 
 ROOT = Path(__file__).resolve().parents[1]
-PROCESSED = ROOT / "data" / "processed"
+# MM_PROCESSED_DIR is for testing only (e.g. a simulated future month); the app normally reads data/processed/.
+PROCESSED = Path(os.environ.get("MM_PROCESSED_DIR", ROOT / "data" / "processed"))
 sys.path.insert(0, str(ROOT / "src"))
 
 # --------------------------------------------------------------------------- wording (CLAUDE.md §0)
@@ -41,8 +43,8 @@ ARTICLES = {
 }
 
 # Pages in the header (paths as given to st.Page in Home.py). None = not built yet, shown as "soon".
-NAV_PAGES = {"Home": "pages/home.py", "My savings": "pages/savings.py",
-             "Prices": "pages/prices.py", "The naira": "pages/naira.py", "Borrowing": None}
+NAV_PAGES = {"Home": "views/home.py", "My savings": "views/savings.py",
+             "Prices": "views/prices.py", "The naira": "views/naira.py", "Borrowing": None}
 
 # --------------------------------------------------------------------------- colours (design/)
 NAVY, BLUE, ORANGE, ORANGE_LIGHT = "#0F1E33", "#2A6FDB", "#D9822B", "#F0A65E"
@@ -296,6 +298,11 @@ a.mm-explore:hover {border-color: #CBD2DC; box-shadow: 0 2px 10px rgba(15,30,51,
 [data-testid="stButtonGroup"] button[aria-checked="true"] {background: #EAF1FC !important; border-color: #2A6FDB !important;}
 [data-testid="stButtonGroup"] button[aria-checked="true"] p {color: #1B4FA8 !important; font-weight: 600;}
 .st-key-quick button[data-variant="pills"] {height: 36px; padding: 0 14px;}
+/* forecast tracker: checked months */
+.mm-table {width: 100%; border-collapse: collapse; background: #FFFFFF; border: 1px solid #E3E6EB; border-radius: 12px;
+  font-size: 14px; overflow: hidden;}
+.mm-table th {text-align: left; font-weight: 600; color: #4A5568; background: #F5F6F8; padding: 10px 12px;}
+.mm-table td {padding: 10px 12px; border-top: 1px solid #EEF0F3; white-space: nowrap;}
 /* range cards (Prices and The naira) */
 .mm-range .num {font-size: 24px;}
 .mm-range .when {font-size: 13px; font-weight: 700; color: #2A6FDB; letter-spacing: 0.5px;}
@@ -526,3 +533,137 @@ def legend(items):
         for n, c, dotted in items
     )
     st.html(f'<ul class="mm mm-legend">{lis}</ul>')
+
+
+# --------------------------------------------------------------------------- forecast tracker
+def _vintage_label(vintage, source):
+    month = pd.Timestamp(f"{vintage}-01")
+    return f"{month:%b %Y}" + (" (as published)" if source == "published" else "")
+
+
+def forecast_tracker(model, series, actual, unit, colour, key, history_months=12):
+    """'How are the forecasts doing?': each saved forecast, frozen exactly as made, with the actual
+    line drawn over it, a plain-words scorecard and every checked month (hits and misses alike).
+
+    model 'inflation' or 'naira'; series 'headline'/'food'/'outlook'; actual: pd.Series by month;
+    unit 'points' or 'naira'.
+    """
+    import plotly.graph_objects as go
+
+    vint = load_csv("forecast_vintages.csv")
+    vint = vint[(vint["model"] == model) & (vint["series"] == series)]
+    cards = load_csv("forecast_scorecard.csv", dates=("last_checked", "next_check"))
+    cards = cards[(cards["model"] == model) & (cards["series"] == series)]
+    scores = load_csv("forecast_scores.csv")
+    scores = scores[(scores["model"] == model) & (scores["series"] == series)] if len(scores) else scores
+    if vint.empty:
+        st.info("No saved forecasts yet.")
+        return
+
+    vint["vintage"] = vint["vintage"].astype(str)
+    cards = cards.assign(vintage=cards["vintage"].astype(str))
+    options = {_vintage_label(v, s): v for v, s in vint.groupby("vintage")["source"].first().items()}
+    labels = list(options)
+    picked = st.pills("Forecast made with data up to", labels, default=labels[0], key=f"{key}_vintage") or labels[0]
+    vintage = options[picked]
+    v = vint[vint["vintage"] == vintage].sort_values("month")
+    card = cards[cards["vintage"] == vintage].iloc[0]
+    sc = scores[scores["vintage"].astype(str) == vintage].sort_values("month") if len(scores) else scores
+    made = pd.Timestamp(f"{vintage}-01")
+    fmt = (lambda x: f"{x:.1f}%") if unit == "points" else (lambda x: naira(x))
+
+    # ---- scorecard in words
+    n = int(card["checked"])
+    if n == 0:
+        when = pd.Timestamp(card["next_check"])
+        sparse = len(v) < 6
+        words = (f"This forecast was made with data up to {made:%B %Y}. Nothing to check yet: the first check is in "
+                 f"<b>{when:%B %Y}</b>, when that month's figure is published.")
+        if sparse:
+            words += (f" Only {len(v)} dates were published for it ({', '.join(f'{m:%b %Y}' for m in v['month'])}), "
+                      "so that is the first month it can be scored.")
+    else:
+        miss_avg = (f"{card['mean_abs_error']:.1f} points" if unit == "points"
+                    else f"{card['mean_abs_error_pct']:.1f}%")
+        naive_avg = (f"{card['mean_abs_naive_error']:.1f} points" if unit == "points"
+                     else f"{(sc['naive_error'].abs() / sc['actual'] * 100).mean():.1f}%")
+        words = (f"Since {made:%B %Y}: <b>{int(card['inside80'])} of {n}</b> month{'s' if n != 1 else ''} inside the "
+                 f"80% range")
+        if card["checked50"] > 0:
+            words += f", <b>{int(card['inside50'])} of {int(card['checked50'])}</b> inside the 50% range"
+        words += (f". Average miss: <b>{miss_avg}</b> (the 'no change' guess missed by {naive_avg}). ")
+        if card["above80"] or card["below80"]:
+            outside = [f"{m:%b %Y} ({fmt(a)}, {'above' if a > hi else 'below'} the range {fmt(lo)} to {fmt(hi)})"
+                       for m, a, lo, hi in zip(sc["month"], sc["actual"], sc["low80"], sc["high80"])
+                       if not lo <= a <= hi]
+            words += f"<b>Missed the 80% range:</b> {'; '.join(outside)}. "
+        else:
+            words += "No month has fallen outside the 80% range so far. "
+        if n < 6:
+            words += (f"That is only {n} month{'s' if n != 1 else ''}, far too early to judge: an honest 80% range "
+                      "should still miss about 1 month in 5, so it needs a year or more of checks.")
+        if pd.notna(card["next_check"]):
+            words += f" Next check: {pd.Timestamp(card['next_check']):%B %Y}."
+    st.html(f'<section class="mm mm-note" style="border-left-color:#2A6FDB"><h3>Scorecard</h3><p>{words}</p>'
+            f'<p style="color:#4A5568">The forecast is shown exactly as it was saved in {made:%B %Y}; '
+            f'old forecasts are never redrawn or edited.</p></section>')
+
+    # ---- chart: the frozen forecast with the actual line over it
+    with st.container(key=f"panel-{key}"):
+        start = made - pd.DateOffset(months=history_months)
+        a = actual.loc[start:]
+        fig = go.Figure()
+        band80, band50 = "rgba(42,111,219,0.14)", "rgba(42,111,219,0.30)"
+        if len(v) >= 6:  # a monthly forecast: draw its bands
+            x = list(v["month"])
+            fig.add_trace(go.Scatter(x=x + x[::-1], y=list(v["high80"]) + list(v["low80"])[::-1], fill="toself",
+                                     fillcolor=band80, line=dict(width=0), hoverinfo="skip", name="80% range"))
+            if v["low50"].notna().all():
+                fig.add_trace(go.Scatter(x=x + x[::-1], y=list(v["high50"]) + list(v["low50"])[::-1], fill="toself",
+                                         fillcolor=band50, line=dict(width=0), hoverinfo="skip", name="50% range"))
+            fig.add_trace(go.Scatter(x=x, y=v["central"], mode="lines", name="Forecast",
+                                     line=dict(color=BLUE, width=2, dash="dash"),
+                                     hovertemplate="forecast " + ("%{y:.1f}%" if unit == "points" else "₦%{y:,.0f}")))
+        else:  # only a few published dates: draw each range as a bar, never join the dots
+            for _, r in v.iterrows():
+                fig.add_trace(go.Scatter(x=[r["month"], r["month"]], y=[r["low80"], r["high80"]], mode="lines",
+                                         line=dict(color="#A9C5F0", width=16), hoverinfo="skip"))
+                if pd.notna(r["low50"]):
+                    fig.add_trace(go.Scatter(x=[r["month"], r["month"]], y=[r["low50"], r["high50"]], mode="lines",
+                                             line=dict(color="#5E8FDE", width=16), hoverinfo="skip"))
+            fig.add_trace(go.Scatter(x=v["month"], y=v["central"], mode="markers", name="Forecast",
+                                     marker=dict(color=NAVY, size=9, line=dict(color="#FFFFFF", width=2)),
+                                     hovertemplate="middle ₦%{y:,.0f}"))
+        fig.add_trace(go.Scatter(x=a.index, y=a, mode="lines", name="Actual", line=dict(color=colour, width=2.5),
+                                 hovertemplate="actual " + ("%{y:.2f}%" if unit == "points" else "₦%{y:,.2f}")))
+        if len(sc):
+            outside = sc[(sc["actual"] < sc["low80"]) | (sc["actual"] > sc["high80"])]
+            fig.add_trace(go.Scatter(x=outside["month"], y=outside["actual"], mode="markers", name="Outside 80%",
+                                     marker=dict(color=BAD, size=10, symbol="x"), hoverinfo="skip"))
+        fig.add_vline(x=made, line_color=GREY, line_width=1, line_dash="dot")
+        fig.add_annotation(x=made, y=1, yref="paper", text=f"Forecast made ({made:%b %Y})", showarrow=False,
+                           xanchor="left", yanchor="top", xshift=4, font=dict(size=12, color=MUTED))
+        if unit == "naira":
+            naira_log_axis(fig, min(a.min(), v["low80"].min()), v["high80"].max())
+        else:
+            fig.update_yaxes(ticksuffix="%", rangemode="tozero")
+        style_figure(fig, height=320)
+        show_chart(fig)
+        items = [("Actual", colour, False), ("Forecast", BLUE if len(v) >= 6 else NAVY, len(v) >= 6),
+                 ("80% range", "#C9DAF5", False)]
+        if v["low50"].notna().any():
+            items.append(("50% range", "#94B7EC", False))
+        if len(sc):
+            items.append(("Outside the 80% range (×)", BAD, False))
+        legend(items)
+
+    # ---- every checked month, hits and misses alike
+    if len(sc):
+        rows = "".join(
+            f'<tr><td>{m:%b %Y}</td><td>{fmt(f)}</td><td>{fmt(lo)} to {fmt(hi)}</td><td><b>{fmt(act)}</b></td>'
+            + ('<td style="color:#1D6B44">✓ inside</td>' if lo <= act <= hi else
+               f'<td style="color:#9B1C1C"><b>✗ {"above" if act > hi else "below"}</b></td>') + '</tr>'
+            for m, f, lo, hi, act in zip(sc["month"], sc["forecast"], sc["low80"], sc["high80"], sc["actual"]))
+        st.html('<div class="mm" style="overflow-x:auto"><table class="mm-table"><thead><tr><th>Month</th>'
+                '<th>Forecast</th><th>80% range</th><th>Actual</th><th>Result</th></tr></thead>'
+                f'<tbody>{rows}</tbody></table></div>')

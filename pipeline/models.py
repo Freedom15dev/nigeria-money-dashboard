@@ -103,13 +103,15 @@ def inflation_forecast(panel):
     for target, measure in [("Headline", "headline"), ("Food", "food")]:
         result = _fit_arima(macro, target)
         fc = result.get_forecast(steps=FORECAST_MONTHS, exog=pd.DataFrame({"Rebased": 1}, index=future))
-        band = fc.conf_int(alpha=0.2)  # 80% interval
+        band = fc.conf_int(alpha=0.2)  # 80% interval (the article's range)
+        band50 = fc.conf_int(alpha=0.5)  # 50% interval, same model, kept for the forecast tracker
         scenario = _naira_scenario(macro, target)
         for i, month in enumerate(future):
             rows.append({
                 "month": month, "measure": measure,
                 "forecast": fc.predicted_mean.iloc[i],
                 "low80": band.iloc[i, 0], "high80": band.iloc[i, 1],
+                "low50": band50.iloc[i, 0], "high50": band50.iloc[i, 1],
                 "naive": macro.loc[last, target],
                 "naira_scenario": scenario.iloc[i],
             })

@@ -210,6 +210,15 @@ def check_models(reproduction, forecast, outlook):
     return errors, log
 
 
+# --------------------------------------------------------------------------- 7. forecast vintages
+def check_vintages():
+    """Saved forecasts are frozen: every vintage must match its fingerprint; only new files may be added."""
+    import vintages
+    errors = vintages.check_unchanged()
+    log = [] if errors else [f"Forecast vintages: all {len(vintages.load_manifest())} saved files unchanged."]
+    return errors, log
+
+
 # --------------------------------------------------------------------------- all together
 def validate(panel, parsed, latest, previous_meta):
     errors, log = [], []
