@@ -75,6 +75,8 @@ Type in any amount and the month you saved it (from January 2006), and pick wher
 what it's worth in naira today, what it can actually **buy** compared with when you saved it, and the options ranked
 from best to worst.
 
+![My savings: ₦100,000 kept in a savings account since January 2006](docs/screenshots/desktop_savings.png)
+
 ![My savings: how each option did since January 2006](docs/screenshots/desktop_savings_results.png)
 
 ### 2. My loan: what will this loan really cost me?
@@ -83,6 +85,8 @@ The [loan calculator](https://github.com/Freedom15dev/nigeria-credit-squeeze) fr
 Type in a loan, or try Tunde's or Amaka's from the article, and see the total in naira, the yearly rate (simple and
 effective), flat vs reducing balance, a month-by-month breakdown, how it compares with bank rates (updated monthly)
 and advertised loan app rates, and what happens if you pay late. No lender is named.
+
+![My loan: what a ₦100,000 loan at 8.25% a month really costs](docs/screenshots/desktop_loan.png)
 
 <p>
   <img src="docs/screenshots/phone_loan.png" alt="My loan on a phone" width="300">
