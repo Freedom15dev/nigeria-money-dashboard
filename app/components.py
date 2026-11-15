@@ -245,7 +245,15 @@ h1 a, h2 a, h3 a {display: none !important;}
 .mm-kpi .num {font-size: 34px;}
 .mm-kpi .chg {font-size: 14px; color: #4A5568;}
 .mm-kpi .chg b {font-weight: 700;}
-.mm-tip {display: inline-block; margin-left: 4px; color: #8A94A6; cursor: help; font-weight: 400;}
+.mm-tip {display: inline-block; margin-left: 4px; color: #5E6878; cursor: help; font-weight: 400;}
+
+/* ---------- keyboard focus: always visible (the custom styles above had hidden Streamlit's rings) ---------- */
+a:focus-visible, [data-testid="stPageLink-NavLink"]:focus-visible, button:focus-visible, summary:focus-visible {
+  outline: 3px solid #2A6FDB !important; outline-offset: 2px; border-radius: 8px;}
+.st-key-panel-inputs [data-testid="stTextInputRootElement"]:focus-within,
+.st-key-panel-inputs .react-aria-ComboBox > [role="group"]:focus-within,
+[data-testid="stNumberInputContainer"]:focus-within {
+  border-color: #2A6FDB !important; box-shadow: 0 0 0 3px rgba(42, 111, 219, 0.25) !important;}
 .mm-explore {flex: 1 1 240px; border-top: 4px solid #2A6FDB; padding: 22px; gap: 8px;
   text-decoration: none !important; color: #0F1E33 !important;}
 .mm-explore.warm {border-top-color: #D9822B;}
@@ -461,8 +469,8 @@ def change_text(x, unit, good_when, words):
 
 def kpi_card(title, value, change_html, help_text, value_colour=NAVY):
     """One key-number card (HTML); put several in <div class="mm mm-cards">."""
-    return (f'<article class="mm-card mm-kpi"><h3>{e(title)}<span class="mm-tip" title="{e(help_text)}" '
-            f'aria-label="{e(help_text)}">ⓘ</span></h3>'
+    return (f'<article class="mm-card mm-kpi"><h3>{e(title)}<span class="mm-tip" role="img" title="{e(help_text)}" '
+            f'aria-label="What this means: {e(help_text)}">ⓘ</span></h3>'
             f'<p class="num" style="color:{value_colour}">{value}</p><p class="chg">{change_html}</p></article>')
 
 
@@ -473,6 +481,14 @@ def load_csv(name, dates=("month",)):
 @st.cache_data(show_spinner=False)
 def _load_csv(name, dates):
     return pd.read_csv(PROCESSED / name, parse_dates=list(dates))
+
+
+def terms_explained(items, title="What these terms mean"):
+    """The plain-words help behind the ⓘ icons, readable on phones and by keyboard (hover tips are not).
+    items: list of (term, explanation)."""
+    with st.expander(title):
+        for term, text in items:
+            st.markdown(f"**{term}.** {text}")
 
 
 def info_box(title, text_html):

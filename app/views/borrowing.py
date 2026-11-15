@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from components import (BLUE, GREY, HELP, NAVY, ORANGE, brand_header, change_text,
+from components import (terms_explained, BLUE, GREY, HELP, NAVY, ORANGE, brand_header, change_text,
                         e, footer, info_box, kpi_card, legend, load_meta, load_panel, page_intro, pct, section_head,
                         show_chart, style_figure, under_the_hood)
 
@@ -81,6 +81,10 @@ cards.append(kpi_card(
     "households) gets the rest."))
 section_head("The key numbers", f"{latest:%B %Y}, compared with {year_ago:%B %Y}")
 st.html(f'<div class="mm mm-cards">{"".join(cards)}</div>')
+terms_explained([("Prime lending rate", HELP["prime"]), ("Maximum lending rate", HELP["max"]),
+                 ("Real rate", HELP["real"]), ("CBN policy rate (MPR)", HELP["mpr"]),
+                 ("Government's share of credit", "Credit to government ÷ all domestic credit from the banking "
+                  "system. The private sector (businesses and households) gets the rest.")])
 RATE_NAMES = {"primeLending": "prime rate", "maxLending": "maximum lending rate", "savingsDeposit": "savings rate",
               "treasuryBill": "Treasury bill rate", "policy_rate": "policy rate"}
 if estimated:  # one line per feed glitch behind an estimated card; the full explanation is under the hood

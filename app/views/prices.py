@@ -5,7 +5,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from components import (BLUE, GREY, HELP, NAVY, ORANGE, brand_header, e, footer, info_box,
+from components import (terms_explained, BLUE, GREY, HELP, NAVY, ORANGE, brand_header, e, footer, info_box,
                         kpi_card, change_text, legend, load_csv, load_meta, load_panel, naira, page_intro, pct,
                         forecast_tracker, section_head, show_chart, style_figure, under_the_hood)
 
@@ -59,6 +59,8 @@ for label, (col, _, help_text) in MEASURES.items():
     cards.append(kpi_card(f"{label} inflation", pct(now[col]), change_text(d, "pts", "down", words), help_text))
 section_head("The key numbers", f"{latest:%B %Y}, compared with {year_ago:%B %Y}")
 st.html(f'<div class="mm mm-cards">{"".join(cards)}</div>')
+terms_explained([("Headline inflation", HELP["inflation"]), ("Food inflation", HELP["food"]),
+                 ("Core inflation", HELP["core"]), ("A range", HELP["range"])])
 
 # ----------------------------------------------------------------------------- history chart
 with st.container(key="panel-inputs"):
