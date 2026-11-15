@@ -271,8 +271,20 @@ nigeria-money-dashboard/
 ├── tests/smoke_test_app.py      # renders every page and checks the numbers on screen
 ├── docs/screenshots/            # the images in this README
 ├── design/                      # the page mockups
-└── .github/workflows/monthly.yml  # the weekly update
+├── .github/workflows/monthly.yml  # data update (runs weekly)
+└── LICENSE                      # MIT, for the code
 ```
+
+---
+
+## Licence
+
+The **code** is released under the [MIT License](LICENSE): you may reuse, change and share it, as long as the
+copyright notice stays with it.
+
+The **data is not mine to license.** The economic figures belong to the **Central Bank of Nigeria** (CBN) and, for US
+consumer prices, the **US Bureau of Labor Statistics** (via FRED). The loan app rates are as advertised by each lender
+and reported in the press. If you reuse the data, credit those sources and check their terms.
 
 ---
 
