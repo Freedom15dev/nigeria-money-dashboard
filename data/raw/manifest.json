@@ -1,37 +1,37 @@
 {
   "inflation": {
     "url": "https://www.cbn.gov.ng/api/GetAllInflationRates",
-    "pulled_at_utc": "2026-11-16T15:40:17+00:00",
-    "records": 285,
-    "sha256": "a2fc02913a4d99a4e54fb5dbc06486db0e4c59d29f6c02d6305f682f92418bb1"
+    "pulled_at_utc": "2026-11-23T18:01:06+00:00",
+    "records": 286,
+    "sha256": "48d262d2925dc73472f9c36f787e95734b3f07fbede05b6c8dec855a44a9dd94"
   },
   "money_market": {
     "url": "https://www.cbn.gov.ng/api/GetAllMoneyMarketIndicators",
-    "pulled_at_utc": "2026-11-16T15:40:17+00:00",
+    "pulled_at_utc": "2026-11-23T18:01:06+00:00",
     "records": 249,
     "sha256": "bdb8412584d6bafba6534bbe556f2ac840029d184910c330ae569df5e9260f35"
   },
   "money_credit": {
     "url": "https://www.cbn.gov.ng/api/GetAllMoneyAndCreditStats",
-    "pulled_at_utc": "2026-11-16T15:40:17+00:00",
+    "pulled_at_utc": "2026-11-23T18:01:06+00:00",
     "records": 437,
     "sha256": "abf2ed013b22a7a0ce15c4565ee9a29da93157f21ac995c2efed13c124402f72"
   },
   "exchange_rates": {
     "url": "https://www.cbn.gov.ng/api/GetAllExchangeRates",
-    "pulled_at_utc": "2026-11-16T15:40:17+00:00",
-    "records": 62657,
-    "sha256": "52c1cb5ffa059cd489fba8f02ed4430b037869a05e6232fad40821d6de379661"
+    "pulled_at_utc": "2026-11-23T18:01:06+00:00",
+    "records": 62735,
+    "sha256": "dd9c79be136a66d908ab1351cbc3298dc14a16759897ef0030104969134570ee"
   },
   "crude": {
     "url": "https://www.cbn.gov.ng/api/GetAllDailyCrude",
-    "pulled_at_utc": "2026-11-16T15:40:17+00:00",
-    "records": 3994,
-    "sha256": "34605dfbc174ac03747ef6d40887b9bfcf6ef38e79102697a0fe470b2729aca7"
+    "pulled_at_utc": "2026-11-23T18:01:06+00:00",
+    "records": 4000,
+    "sha256": "57cde0b81b1b175dd1c628a55f15bc23bcd925d6266de3613a877eebd5391ce7"
   },
   "us_cpi": {
     "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL",
-    "pulled_at_utc": "2026-11-16T15:40:17+00:00",
+    "pulled_at_utc": "2026-11-23T18:01:06+00:00",
     "records": 959,
     "sha256": "c9be2d4909ffd28d91f07df5d113151b0fe7ba602144ee6fd453d3bc8426efde"
   }
